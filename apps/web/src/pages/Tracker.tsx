@@ -2,43 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import Layout from '../components/layout/Layout';
+import { Card, CardHeader, CardBody, Button, Badge, Modal, Loader } from '../components/ui';
+import { MetricCard } from '../components/dashboard/MetricCard';
+import { ExpenseForm } from '../components/forms/ExpenseForm';
+import { CoachContactForm } from '../components/forms/CoachContactForm';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import clsx from 'clsx';
 
-const EXPENSE_CATEGORIES = [
-  'SHOWCASE_CAMP',
-  'TOURNAMENT_ENTRY',
-  'TRAVEL_AIRFARE',
-  'TRAVEL_HOTEL',
-  'TRAVEL_GROUND',
-  'EQUIPMENT',
-  'HIGHLIGHT_REEL',
-  'RECRUITING_SERVICE',
-  'TRAINING',
-  'OTHER',
-];
+type TabType = 'expenses' | 'contacts' | 'analysis';
 
 export default function Tracker() {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showAddExpense, setShowAddExpense] = useState(false);
-  const [showAddContact, setShowAddContact] = useState(false);
-
-  const [formData, setFormData] = useState({
-    label: '',
-    amount: '',
-    category: 'SHOWCASE_CAMP',
-    date: new Date().toISOString().split('T')[0],
-    notes: '',
-  });
-
-  const [contactData, setContactData] = useState({
-    schoolName: '',
-    coachName: '',
-    divisionTier: 'D1_POWER4',
-    contactType: 'REPLY_RECEIVED',
-    contactDate: new Date().toISOString().split('T')[0],
-  });
+  const [activeTab, setActiveTab] = useState<TabType>('expenses');
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [submittingExpense, setSubmittingExpense] = useState(false);
+  const [submittingContact, setSubmittingContact] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -61,22 +43,14 @@ export default function Tracker() {
     loadData();
   }, []);
 
-  const handleAddExpense = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleExpenseSubmit = async (data: any) => {
+    setSubmittingExpense(true);
     try {
       await api.expenses.create({
-        ...formData,
-        amount: parseFloat(formData.amount),
-        date: new Date(formData.date),
+        ...data,
+        date: new Date(data.date),
       });
-      setFormData({
-        label: '',
-        amount: '',
-        category: 'SHOWCASE_CAMP',
-        date: new Date().toISOString().split('T')[0],
-        notes: '',
-      });
-      setShowAddExpense(false);
+      setShowExpenseModal(false);
       // Reload data
       const [expensesRes, summaryRes] = await Promise.all([
         api.expenses.list(),
@@ -86,36 +60,33 @@ export default function Tracker() {
       setSummary(summaryRes);
     } catch (err) {
       console.error('Error adding expense:', err);
+    } finally {
+      setSubmittingExpense(false);
     }
   };
 
-  const handleAddContact = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleContactSubmit = async (data: any) => {
+    setSubmittingContact(true);
     try {
       await api.contacts.create({
-        ...contactData,
-        contactDate: new Date(contactData.contactDate),
+        ...data,
+        date: new Date(data.date),
       });
-      setContactData({
-        schoolName: '',
-        coachName: '',
-        divisionTier: 'D1_POWER4',
-        contactType: 'REPLY_RECEIVED',
-        contactDate: new Date().toISOString().split('T')[0],
-      });
-      setShowAddContact(false);
+      setShowContactModal(false);
       // Reload data
       const contactsRes = await api.contacts.list();
       setContacts(contactsRes || []);
     } catch (err) {
       console.error('Error adding contact:', err);
+    } finally {
+      setSubmittingContact(false);
     }
   };
 
   if (loading) {
     return (
       <Layout>
-        <div className="text-center py-12">Loading tracker...</div>
+        <Loader fullscreen label="Loading your tracker..." />
       </Layout>
     );
   }
@@ -124,277 +95,266 @@ export default function Tracker() {
     ? (summary.totalSpend / summary.budgetGoal) * 100
     : 0;
 
+  const tabs: Array<{ id: TabType; label: string; icon: string }> = [
+    { id: 'expenses', label: 'Expenses', icon: '💰' },
+    { id: 'contacts', label: 'Coach Contacts', icon: '📞' },
+    { id: 'analysis', label: 'Analysis', icon: '📊' },
+  ];
+
   return (
     <Layout>
       <div className="space-y-8">
+        {/* Header */}
         <div>
-          <h1 className="text-4xl font-playfair text-gold mb-2">Recruitment Tracker</h1>
-          <p className="text-text-secondary">Track your spending and coach contact strategy</p>
+          <h1 className="text-4xl font-playfair font-bold text-text-primary mb-2">
+            Recruitment Tracker
+          </h1>
+          <p className="text-text-secondary">
+            Track your spending and coach contact strategy
+          </p>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="card">
-            <div className="text-sm text-text-secondary mb-2">Total Spending</div>
-            <div className="text-3xl font-playfair text-gold mb-2">
-              {formatCurrency(summary?.totalSpend || 0)}
-            </div>
-            <div className="w-full bg-border-color rounded-full h-2 overflow-hidden">
-              <div
-                className="bg-gold h-full transition-all"
-                style={{ width: `${Math.min(budgetPercent, 100)}%` }}
-              />
-            </div>
-            <p className="text-xs text-text-secondary mt-2">
-              of {formatCurrency(summary?.budgetGoal || 5000)} budget
-            </p>
-          </div>
-
-          <div className="card">
-            <div className="text-sm text-text-secondary mb-2">Blended CAC</div>
-            <div className="text-3xl font-playfair text-teal">
-              ${summary?.cacResult?.blendedCAC ? summary.cacResult.blendedCAC.toFixed(0) : '—'}
-            </div>
-            <p className="text-xs text-text-secondary mt-2">per coach contact</p>
-          </div>
-
-          <div className="card">
-            <div className="text-sm text-text-secondary mb-2">Quality-Weighted CAC</div>
-            <div className="text-3xl font-playfair text-green">
-              ${summary?.cacResult?.weightedCAC ? summary.cacResult.weightedCAC.toFixed(0) : '—'}
-            </div>
-            <p className="text-xs text-text-secondary mt-2">adjusted for division tier</p>
-          </div>
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <MetricCard
+            title="Total Spending"
+            value={formatCurrency(summary?.totalSpend || 0)}
+            color="gold"
+            details={budgetPercent > 0 ? `${budgetPercent.toFixed(0)}% of budget` : 'Track your expenses'}
+            animated
+          />
+          <MetricCard
+            title="Blended CAC"
+            value={summary?.cacResult?.blendedCAC ? `$${summary.cacResult.blendedCAC.toFixed(0)}` : '—'}
+            color="teal"
+            details="per coach contact"
+            animated
+          />
+          <MetricCard
+            title="Weighted CAC"
+            value={summary?.cacResult?.weightedCAC ? `$${summary.cacResult.weightedCAC.toFixed(0)}` : '—'}
+            color="success"
+            details="adjusted for division"
+            animated
+          />
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 border-b border-border-color">
-          <button className="px-4 py-3 border-b-2 border-gold text-gold font-semibold">
-            Expenses
-          </button>
-          <button className="px-4 py-3 text-text-secondary hover:text-text-primary">
-            Coach Contacts
-          </button>
+        <div className="flex gap-1 border-b border-border-color overflow-x-auto">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={clsx(
+                'px-4 py-3 font-medium whitespace-nowrap transition-all border-b-2',
+                activeTab === tab.id
+                  ? 'border-gold text-gold'
+                  : 'border-transparent text-text-secondary hover:text-text-primary'
+              )}
+            >
+              <span className="mr-2">{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        {/* Expenses Section */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Expenses</h2>
-            <button
-              onClick={() => setShowAddExpense(!showAddExpense)}
-              className="btn-primary text-sm"
-            >
-              {showAddExpense ? 'Cancel' : '+ Add Expense'}
-            </button>
-          </div>
+        {/* Tab Content */}
+        {activeTab === 'expenses' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold text-text-primary">
+                Recent Expenses
+              </h2>
+              <Button onClick={() => setShowExpenseModal(true)}>
+                + Add Expense
+              </Button>
+            </div>
 
-          {showAddExpense && (
-            <form onSubmit={handleAddExpense} className="card space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Description</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.label}
-                  onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                  className="w-full bg-bg-primary border border-border-color rounded px-3 py-2 text-text-primary"
-                  placeholder="e.g., Elite Showcase - Atlanta"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Amount ($)</label>
-                  <input
-                    type="number"
-                    required
-                    step="0.01"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                    className="w-full bg-bg-primary border border-border-color rounded px-3 py-2 text-text-primary"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full bg-bg-primary border border-border-color rounded px-3 py-2 text-text-primary"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Category</label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full bg-bg-primary border border-border-color rounded px-3 py-2 text-text-primary"
-                >
-                  {EXPENSE_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat.replace(/_/g, ' ')}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <button type="submit" className="btn-primary w-full">
-                Save Expense
-              </button>
-            </form>
-          )}
-
-          <div className="space-y-2">
             {expenses.length > 0 ? (
-              expenses.map((expense) => (
-                <div
-                  key={expense.id}
-                  className="card-interactive flex justify-between items-center p-4"
-                >
-                  <div>
-                    <h3 className="font-semibold">{expense.label}</h3>
-                    <p className="text-sm text-text-secondary">
-                      {new Date(expense.date).toLocaleDateString()} • {expense.category.replace(/_/g, ' ')}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-playfair text-lg font-bold text-gold">
-                      {formatCurrency(expense.amount)}
+              <div className="grid gap-3">
+                {expenses.map((expense) => (
+                  <Card key={expense.id} hoverable className="p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-semibold text-text-primary">
+                          {expense.description || expense.label}
+                        </h3>
+                        <div className="flex items-center gap-2 mt-1 text-sm text-text-secondary">
+                          <span>{new Date(expense.date).toLocaleDateString()}</span>
+                          <span>•</span>
+                          <Badge size="sm" variant="secondary">
+                            {expense.category}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-gold font-playfair">
+                          {formatCurrency(expense.amount)}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="card text-center py-8 text-text-secondary">
-                No expenses logged yet. Add your first expense to get started!
+                  </Card>
+                ))}
               </div>
+            ) : (
+              <Card className="text-center py-12">
+                <p className="text-lg text-text-secondary mb-4">No expenses logged yet</p>
+                <Button onClick={() => setShowExpenseModal(true)}>
+                  Create your first expense
+                </Button>
+              </Card>
             )}
           </div>
-        </div>
+        )}
 
-        {/* Coach Contacts Section */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Coach Contacts</h2>
-            <button
-              onClick={() => setShowAddContact(!showAddContact)}
-              className="btn-primary text-sm"
-            >
-              {showAddContact ? 'Cancel' : '+ Add Contact'}
-            </button>
-          </div>
+        {activeTab === 'contacts' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold text-text-primary">
+                Coach Contacts
+              </h2>
+              <Button onClick={() => setShowContactModal(true)}>
+                + Add Contact
+              </Button>
+            </div>
 
-          {showAddContact && (
-            <form onSubmit={handleAddContact} className="card space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">School Name</label>
-                <input
-                  type="text"
-                  required
-                  value={contactData.schoolName}
-                  onChange={(e) => setContactData({ ...contactData, schoolName: e.target.value })}
-                  className="w-full bg-bg-primary border border-border-color rounded px-3 py-2 text-text-primary"
-                  placeholder="e.g., University of California, Los Angeles"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Coach Name</label>
-                  <input
-                    type="text"
-                    value={contactData.coachName}
-                    onChange={(e) => setContactData({ ...contactData, coachName: e.target.value })}
-                    className="w-full bg-bg-primary border border-border-color rounded px-3 py-2 text-text-primary"
-                    placeholder="Coach name (optional)"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Division Tier</label>
-                  <select
-                    value={contactData.divisionTier}
-                    onChange={(e) => setContactData({ ...contactData, divisionTier: e.target.value })}
-                    className="w-full bg-bg-primary border border-border-color rounded px-3 py-2 text-text-primary"
-                  >
-                    <option value="D1_POWER4">D1 Power 4</option>
-                    <option value="D1_MID_MAJOR">D1 Mid-Major</option>
-                    <option value="D2">D2</option>
-                    <option value="D3">D3</option>
-                    <option value="NAIA">NAIA</option>
-                    <option value="JUCO">JUCO</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Contact Type</label>
-                <select
-                  value={contactData.contactType}
-                  onChange={(e) => setContactData({ ...contactData, contactType: e.target.value })}
-                  className="w-full bg-bg-primary border border-border-color rounded px-3 py-2 text-text-primary"
-                >
-                  <option value="INITIAL_EMAIL_SENT">Initial Email Sent</option>
-                  <option value="REPLY_RECEIVED">Reply Received</option>
-                  <option value="PHONE_CALL">Phone Call</option>
-                  <option value="OFFICIAL_VISIT">Official Visit</option>
-                  <option value="OFFER_EXTENDED">Offer Extended</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Contact Date</label>
-                <input
-                  type="date"
-                  required
-                  value={contactData.contactDate}
-                  onChange={(e) => setContactData({ ...contactData, contactDate: e.target.value })}
-                  className="w-full bg-bg-primary border border-border-color rounded px-3 py-2 text-text-primary"
-                />
-              </div>
-
-              <button type="submit" className="btn-primary w-full">
-                Save Contact
-              </button>
-            </form>
-          )}
-
-          <div className="space-y-2">
             {contacts.length > 0 ? (
-              contacts.map((contact) => (
-                <div
-                  key={contact.id}
-                  className="card-interactive flex justify-between items-center p-4"
-                >
-                  <div>
-                    <h3 className="font-semibold">{contact.schoolName}</h3>
-                    <p className="text-sm text-text-secondary">
-                      {contact.divisionTier.replace(/_/g, ' ')} • {contact.contactType.replace(/_/g, ' ')}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    {contact.isVerbal && (
-                      <span className="inline-block bg-yellow/20 text-yellow text-xs px-2 py-1 rounded mb-2">
-                        VERBAL
-                      </span>
-                    )}
-                    <div className="text-sm text-text-secondary">
-                      {new Date(contact.contactDate).toLocaleDateString()}
+              <div className="grid gap-3">
+                {contacts.map((contact) => (
+                  <Card key={contact.id} hoverable className="p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-text-primary">
+                            {contact.schoolName}
+                          </h3>
+                          {contact.isVerbal && (
+                            <Badge variant="success" size="sm">
+                              VERBAL OFFER
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-text-secondary">
+                          <span>{contact.divisionTier.replace(/_/g, ' ')}</span>
+                          <span>•</span>
+                          <span>{contact.contactType.replace(/_/g, ' ')}</span>
+                          <span>•</span>
+                          <span>{new Date(contact.date).toLocaleDateString()}</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="card text-center py-8 text-text-secondary">
-                No coach contacts logged yet. Add your first contact to get started!
+                  </Card>
+                ))}
               </div>
+            ) : (
+              <Card className="text-center py-12">
+                <p className="text-lg text-text-secondary mb-4">No coach contacts logged yet</p>
+                <Button onClick={() => setShowContactModal(true)}>
+                  Create your first contact
+                </Button>
+              </Card>
             )}
           </div>
-        </div>
+        )}
+
+        {activeTab === 'analysis' && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-semibold text-text-primary">
+              CAC Analysis
+            </h2>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Expense by Category */}
+              {expenses.length > 0 && (
+                <Card>
+                  <CardHeader title="Spending by Category" />
+                  <CardBody>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <PieChart>
+                        <Pie
+                          data={expenses.reduce((acc: any[], exp) => {
+                            const existing = acc.find((e) => e.category === exp.category);
+                            if (existing) {
+                              existing.value += exp.amount;
+                            } else {
+                              acc.push({ category: exp.category, value: exp.amount });
+                            }
+                            return acc;
+                          }, [])}
+                          dataKey="value"
+                          nameKey="category"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={80}
+                        >
+                          {['#F0A500', '#0FB8A8', '#22C55E', '#F59E0B', '#5BA5D9'].map((color, index) => (
+                            <Cell key={`cell-${index}`} fill={color} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </CardBody>
+                </Card>
+              )}
+
+              {/* Contact Distribution */}
+              {contacts.length > 0 && (
+                <Card>
+                  <CardHeader title="Contacts by Division" />
+                  <CardBody>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart
+                        data={contacts.reduce((acc: any[], contact) => {
+                          const existing = acc.find((e) => e.division === contact.divisionTier);
+                          if (existing) {
+                            existing.count += 1;
+                          } else {
+                            acc.push({ division: contact.divisionTier, count: 1 });
+                          }
+                          return acc;
+                        }, [])}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                        <XAxis dataKey="division" stroke="rgba(255,255,255,0.5)" />
+                        <YAxis stroke="rgba(255,255,255,0.5)" />
+                        <Tooltip />
+                        <Bar dataKey="count" fill="#F0A500" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardBody>
+                </Card>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Modals */}
+        <Modal
+          isOpen={showExpenseModal}
+          onClose={() => setShowExpenseModal(false)}
+          title="Add Expense"
+          subtitle="Log a new recruitment expense"
+          size="md"
+        >
+          <ExpenseForm
+            onSubmit={handleExpenseSubmit}
+            isLoading={submittingExpense}
+          />
+        </Modal>
+
+        <Modal
+          isOpen={showContactModal}
+          onClose={() => setShowContactModal(false)}
+          title="Add Coach Contact"
+          subtitle="Log a new coach contact"
+          size="md"
+        >
+          <CoachContactForm
+            onSubmit={handleContactSubmit}
+            isLoading={submittingContact}
+          />
+        </Modal>
       </div>
     </Layout>
   );
