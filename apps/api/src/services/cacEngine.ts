@@ -1,8 +1,8 @@
-import { PrismaClient, DivisionTier, ContactType } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-const DIVISION_WEIGHTS: Record<DivisionTier, number> = {
+const DIVISION_WEIGHTS: Record<string, number> = {
   D1_POWER4: 4.0,
   D1_MID_MAJOR: 2.5,
   D2: 1.5,
@@ -12,10 +12,10 @@ const DIVISION_WEIGHTS: Record<DivisionTier, number> = {
 };
 
 const QUALIFYING_TYPES = [
-  ContactType.REPLY_RECEIVED,
-  ContactType.PHONE_CALL,
-  ContactType.OFFICIAL_VISIT,
-  ContactType.OFFER_EXTENDED,
+  'REPLY_RECEIVED',
+  'PHONE_CALL',
+  'OFFICIAL_VISIT',
+  'OFFER_EXTENDED',
 ];
 
 export interface CACResult {
@@ -23,7 +23,7 @@ export interface CACResult {
   weightedCAC: number | null;
   contactValues: Array<{
     schoolName: string;
-    divisionTier: DivisionTier;
+    divisionTier: string;
     weight: number;
     linkedSpend: number;
   }>;

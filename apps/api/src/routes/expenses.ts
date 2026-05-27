@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient, ExpenseCategory } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { calculateCAC } from '../services/cacEngine.js';
 
 const router = Router();
@@ -25,7 +25,7 @@ router.get('/', async (req: Request, res: Response) => {
     const where: any = { athleteId: user.athlete.id };
 
     if (category) {
-      where.category = category as ExpenseCategory;
+      where.category = category as string;
     }
 
     if (fromDate || toDate) {

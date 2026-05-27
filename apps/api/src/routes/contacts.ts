@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient, ContactType } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { calculateCAC } from '../services/cacEngine.js';
 
 const router = Router();
@@ -64,7 +64,7 @@ router.post('/', async (req: Request, res: Response) => {
         schoolName,
         coachName,
         coachEmail,
-        contactType: contactType as ContactType,
+        contactType: contactType as string,
         divisionTier,
         contactDate: new Date(contactDate),
         notes,

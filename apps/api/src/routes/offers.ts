@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient, Division, OfferStatus, OfferConfidence } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { estimateMeritAid } from '../services/meritAidEngine.js';
 import { project4YearCost } from '../services/projectionEngine.js';
 
@@ -68,7 +68,7 @@ router.post('/', async (req: Request, res: Response) => {
       data: {
         athleteId: user.athlete.id,
         schoolName,
-        division: division as Division,
+        division: division as string,
         athleticScholarshipPct,
         meritAidRangeLow,
         meritAidRangeHigh,
@@ -79,7 +79,7 @@ router.post('/', async (req: Request, res: Response) => {
         otherFees,
         expectedAnnualContrib: expectedAnnualContrib || 0,
         isVerbal: isVerbal || false,
-        confidenceLevel: (confidenceLevel || 'SPECULATIVE') as OfferConfidence,
+        confidenceLevel: (confidenceLevel || 'SPECULATIVE') as string,
       },
     });
 
