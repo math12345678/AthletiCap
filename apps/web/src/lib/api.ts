@@ -71,7 +71,7 @@ export const api = {
   influence: {
     getBrandReadiness: () => apiRequest('GET', '/api/influence/brand-readiness'),
     getEligibility: () => apiRequest('GET', '/api/influence/eligibility'),
-    acknowledgeDis closure: () => apiRequest('POST', '/api/influence/acknowledge-disclosure'),
+    acknowledgeDisclosure: () => apiRequest('POST', '/api/influence/acknowledge-disclosure'),
     getSocialProfiles: () => apiRequest('GET', '/api/influence/social-profiles'),
     createSocialProfile: (data: any) => apiRequest('POST', '/api/influence/social-profiles', data),
   },
