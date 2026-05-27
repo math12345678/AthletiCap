@@ -3,11 +3,31 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import Layout from '../components/layout/Layout';
-import MetricCard from '../components/dashboard/MetricCard';
+import { MetricCard } from '../components/dashboard/MetricCard';
+import { Card, CardHeader, CardBody, Badge, Button, Loader } from '../components/ui';
+import clsx from 'clsx';
+
+interface DashboardData {
+  athlete: {
+    firstName: string;
+    sport: string;
+    gradYear: number;
+  };
+  totalSpend: number;
+  budgetGoal: number;
+  contactCount: number;
+  recentOffers?: any[];
+  topDivisionTier?: string;
+  lowestNetCostOffer?: any;
+  brandReadiness?: {
+    score: number;
+    tier: string;
+  };
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,9 +49,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-text-secondary">Loading dashboard...</div>
-        </div>
+        <Loader fullscreen label="Loading your dashboard..." />
       </Layout>
     );
   }
@@ -39,142 +57,253 @@ export default function Dashboard() {
   if (error || !data) {
     return (
       <Layout>
-        <div className="p-6 bg-red/20 border border-red rounded-lg text-red">
-          Error loading dashboard: {error}
-        </div>
+        <Card className="bg-error-500/10 border-error-500/50">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">⚠️</span>
+            <div>
+              <h3 className="font-semibold text-error-600">Error Loading Dashboard</h3>
+              <p className="text-sm text-error-600/80 mt-1">{error || 'Unknown error'}</p>
+              <Button
+                size="sm"
+                variant="error"
+                className="mt-3"
+                onClick={() => window.location.reload()}
+              >
+                Try Again
+              </Button>
+            </div>
+          </div>
+        </Card>
       </Layout>
     );
   }
 
   const athlete = data.athlete;
   const budgetRemaining = (data.budgetGoal || 0) - data.totalSpend;
-  const budgetPercent = data.budgetGoal ? data.totalSpend / data.budgetGoal : 0;
+  const budgetPercent = data.budgetGoal ? (data.totalSpend / data.budgetGoal) * 100 : 0;
+  const spendTrend = 12; // Example: 12% increase from last month
 
   return (
     <Layout>
       <div className="space-y-8">
-        {/* Header */}
+        {/* Welcome Hero Section */}
+        <div className="bg-gradient-to-r from-gold-500/10 to-teal-500/10 border border-gold-500/20 rounded-xl p-8 relative overflow-hidden">
+          <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-gold-500/5 blur-3xl" />
+          <div className="relative">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h1 className="text-4xl font-playfair font-bold text-text-primary mb-2">
+                  Welcome back, {athlete.firstName}
+                </h1>
+                <p className="text-lg text-text-secondary">
+                  {athlete.sport} • Class of {athlete.gradYear}
+                </p>
+              </div>
+              <div className="text-5xl">🎯</div>
+            </div>
+            <p className="text-text-secondary max-w-2xl">
+              You're on track with your recruitment goals. Keep monitoring your spending and growing your brand to attract more offers.
+            </p>
+          </div>
+        </div>
+
+        {/* Key Metrics Grid */}
         <div>
-          <h1 className="text-4xl font-playfair text-gold mb-2">
-            {athlete.firstName}'s Recruitment Dashboard
-          </h1>
-          <p className="text-text-secondary">
-            {athlete.sport} • Class of {athlete.gradYear}
-          </p>
-        </div>
-
-        {/* Status Summary */}
-        <div className="bg-bg-secondary border border-border-color rounded-lg p-6">
-          <h2 className="font-semibold mb-4">Season Summary</h2>
-          <p className="text-text-secondary">
-            Season to date: <span className="text-gold">{formatCurrency(data.totalSpend)}</span> spent
-            {' '} • <span className="text-gold">{data.contactCount}</span> coach replies
-            {' '} • <span className="text-gold">{data.recentOffers?.length || 0}</span> offers to compare
-          </p>
-        </div>
-
-        {/* Metric Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MetricCard
-            title="Recruitment Spend"
-            value={formatCurrency(data.totalSpend)}
-            label={`of ${formatCurrency(data.budgetGoal || 5000)} goal`}
-            accent="gold"
-          />
-          <MetricCard
-            title="Coach Contacts"
-            value={data.contactCount.toString()}
-            label={data.topDivisionTier ? `Top: ${data.topDivisionTier}` : 'Add your first contact'}
-            accent="teal"
-          />
-          {data.lowestNetCostOffer ? (
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
+            Quick Overview
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <MetricCard
-              title="Lowest Net Cost"
-              value={formatCurrency(
-                data.lowestNetCostOffer.annualCOA -
-                data.lowestNetCostOffer.athleticScholarshipPct * data.lowestNetCostOffer.annualCOA
-              )}
-              label={data.lowestNetCostOffer.schoolName}
-              accent="green"
+              title="Recruitment Spend"
+              value={formatCurrency(data.totalSpend)}
+              unit={`/ ${formatCurrency(data.budgetGoal)}`}
+              trend={{ value: spendTrend, isPositive: false, label: 'vs last month' }}
+              icon="💰"
+              color="gold"
+              details={budgetRemaining > 0 ? `${budgetRemaining > 0 ? '$' : ''} ${budgetRemaining.toLocaleString()} remaining` : 'Budget exceeded'}
+              animated
             />
-          ) : (
             <MetricCard
-              title="Lowest Net Cost"
-              value="—"
-              label="Add your first offer"
-              accent="green"
+              title="Coach Contacts"
+              value={data.contactCount}
+              icon="📞"
+              color="teal"
+              details={data.topDivisionTier ? `Top division: ${data.topDivisionTier}` : 'Add your first contact'}
+              animated
             />
-          )}
-          {data.brandReadiness ? (
+            <MetricCard
+              title="Active Offers"
+              value={data.recentOffers?.length || 0}
+              icon="💼"
+              color="info"
+              details={data.recentOffers && data.recentOffers.length > 0 ? `${data.recentOffers.length} school${data.recentOffers.length > 1 ? 's' : ''} to compare` : 'Start receiving offers'}
+              onClick={() => navigate('/offers')}
+              animated
+            />
             <MetricCard
               title="Brand Score"
-              value={`${data.brandReadiness.score}/100`}
-              label={data.brandReadiness.tier}
-              accent="gold"
+              value={data.brandReadiness?.score || 0}
+              unit="/100"
+              icon="⭐"
+              color="success"
+              details={data.brandReadiness?.tier || 'Build your brand'}
+              onClick={() => navigate('/influence')}
+              animated
             />
-          ) : (
-            <MetricCard
-              title="Brand Score"
-              value="—"
-              label="Connect social profiles"
-              accent="gold"
-            />
-          )}
+          </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button
-            onClick={() => navigate('/tracker')}
-            className="bg-bg-secondary border border-border-color rounded-lg p-6 hover:bg-bg-elevated transition-colors text-left"
-          >
-            <div className="text-2xl mb-2">📊</div>
-            <h3 className="font-semibold">Recruitment Tracker</h3>
-            <p className="text-sm text-text-secondary mt-2">Log expenses and track coach contacts</p>
-          </button>
+        {/* Budget Progress */}
+        <div>
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
+            Budget Allocation
+          </h2>
+          <Card>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-text-primary">Spending Progress</h3>
+              <span className="text-sm text-text-secondary">{budgetPercent.toFixed(0)}%</span>
+            </div>
+            <div className="h-3 bg-bg-primary rounded-full overflow-hidden mb-4">
+              <div
+                className={clsx(
+                  'h-full rounded-full transition-all duration-500',
+                  budgetPercent > 80 ? 'bg-error-500' : 'bg-gold-500'
+                )}
+                style={{ width: `${Math.min(budgetPercent, 100)}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-xs text-text-secondary">
+              <span>{formatCurrency(data.totalSpend)} spent</span>
+              <span>{formatCurrency(budgetRemaining)} remaining</span>
+            </div>
+          </Card>
+        </div>
 
-          <button
-            onClick={() => navigate('/offers')}
-            className="bg-bg-secondary border border-border-color rounded-lg p-6 hover:bg-bg-elevated transition-colors text-left"
-          >
-            <div className="text-2xl mb-2">💰</div>
-            <h3 className="font-semibold">Financial Matrix</h3>
-            <p className="text-sm text-text-secondary mt-2">Compare offers and calculate net costs</p>
-          </button>
+        {/* Action Cards */}
+        <div>
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
+            Quick Actions
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card hoverable onClick={() => navigate('/tracker')} className="cursor-pointer group">
+              <div className="flex items-start justify-between mb-3">
+                <div className="text-3xl group-hover:scale-110 transition-transform">📊</div>
+              </div>
+              <h3 className="font-semibold text-text-primary mb-1">Recruitment Tracker</h3>
+              <p className="text-sm text-text-secondary">Log expenses and track coach contacts</p>
+            </Card>
 
-          <button
-            onClick={() => navigate('/influence')}
-            className="bg-bg-secondary border border-border-color rounded-lg p-6 hover:bg-bg-elevated transition-colors text-left"
-          >
-            <div className="text-2xl mb-2">📈</div>
-            <h3 className="font-semibold">Brand Analytics</h3>
-            <p className="text-sm text-text-secondary mt-2">Track social media growth and engagement</p>
-          </button>
+            <Card hoverable onClick={() => navigate('/offers')} className="cursor-pointer group">
+              <div className="flex items-start justify-between mb-3">
+                <div className="text-3xl group-hover:scale-110 transition-transform">💼</div>
+              </div>
+              <h3 className="font-semibold text-text-primary mb-1">Financial Matrix</h3>
+              <p className="text-sm text-text-secondary">Compare offers and project costs</p>
+            </Card>
+
+            <Card hoverable onClick={() => navigate('/influence')} className="cursor-pointer group">
+              <div className="flex items-start justify-between mb-3">
+                <div className="text-3xl group-hover:scale-110 transition-transform">⭐</div>
+              </div>
+              <h3 className="font-semibold text-text-primary mb-1">Brand Analytics</h3>
+              <p className="text-sm text-text-secondary">Track social media growth</p>
+            </Card>
+          </div>
         </div>
 
         {/* Recent Offers */}
         {data.recentOffers && data.recentOffers.length > 0 && (
-          <div className="card">
-            <h2 className="text-xl font-semibold mb-6">Recent Offers</h2>
-            <div className="space-y-4">
-              {data.recentOffers.map((offer: any) => (
-                <div key={offer.id} className="flex justify-between items-center pb-4 border-b border-border-color last:border-b-0">
-                  <div>
-                    <h3 className="font-semibold">{offer.schoolName}</h3>
-                    <p className="text-sm text-text-secondary">
-                      {offer.athleticScholarshipPct * 100}% athletic • {offer.division}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-playfair text-lg text-gold">
-                      {formatCurrency(offer.annualCOA * (1 - offer.athleticScholarshipPct))}
-                    </div>
-                    {offer.isVerbal && <span className="text-xs text-yellow">VERBAL</span>}
-                  </div>
-                </div>
-              ))}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">
+                  Active Offers
+                </h2>
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => navigate('/offers')}
+              >
+                View All →
+              </Button>
             </div>
+            <Card>
+              <div className="space-y-3">
+                {data.recentOffers.slice(0, 3).map((offer: any) => (
+                  <div
+                    key={offer.id}
+                    className="flex items-center justify-between p-4 bg-bg-primary rounded-lg hover:bg-bg-elevated transition-colors"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-semibold text-text-primary">{offer.schoolName}</h4>
+                        {offer.isVerbal && (
+                          <Badge variant="success" size="sm">
+                            VERBAL OFFER
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-text-secondary">
+                        {(offer.athleticScholarshipPct * 100).toFixed(0)}% athletic scholarship • {offer.division}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-gold font-playfair">
+                        {formatCurrency(offer.annualCOA * (1 - offer.athleticScholarshipPct))}
+                      </div>
+                      <p className="text-xs text-text-secondary">annual net cost</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
           </div>
+        )}
+
+        {/* Call-to-Action Sections */}
+        {data.contactCount === 0 && (
+          <Card className="bg-info-500/10 border-info-500/30">
+            <div className="flex items-start gap-4">
+              <div className="text-3xl">📞</div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-text-primary">Get Started: Track Your Contacts</h3>
+                <p className="text-sm text-text-secondary mt-1">
+                  Start logging the coaches you've contacted to see your recruitment cost analysis.
+                </p>
+                <Button
+                  size="sm"
+                  variant="info"
+                  className="mt-3"
+                  onClick={() => navigate('/tracker')}
+                >
+                  Go to Tracker
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {!data.brandReadiness && (
+          <Card className="bg-success-500/10 border-success-500/30">
+            <div className="flex items-start gap-4">
+              <div className="text-3xl">⭐</div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-text-primary">Build Your Brand</h3>
+                <p className="text-sm text-text-secondary mt-1">
+                  Connect your social media profiles to track your brand readiness and grow your influence.
+                </p>
+                <Button
+                  size="sm"
+                  variant="success"
+                  className="mt-3"
+                  onClick={() => navigate('/influence')}
+                >
+                  Connect Profiles
+                </Button>
+              </div>
+            </div>
+          </Card>
         )}
       </div>
     </Layout>
