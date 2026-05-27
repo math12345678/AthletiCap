@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { calculateCAC } from '../services/cacEngine.js';
+import { calculateCAC } from '../services/cacEngine';
 
 const router = Router();
 const prisma = new PrismaClient();

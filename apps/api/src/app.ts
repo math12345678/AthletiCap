@@ -2,13 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import { requireAuth } from '@clerk/express';
 
-import expensesRouter from './routes/expenses.js';
-import contactsRouter from './routes/contacts.js';
-import offersRouter from './routes/offers.js';
-import influenceRouter from './routes/influence.js';
-import dashboardRouter from './routes/dashboard.js';
-import authRouter from './routes/auth.js';
-import { nilEligibilityMiddleware } from './middleware/nilEligibility.js';
+import expensesRouter from './routes/expenses';
+import contactsRouter from './routes/contacts';
+import offersRouter from './routes/offers';
+import influenceRouter from './routes/influence';
+import dashboardRouter from './routes/dashboard';
+import authRouter from './routes/auth';
+import { nilEligibilityMiddleware } from './middleware/nilEligibility';
 
 const app = express();
 

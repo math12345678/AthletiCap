@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { estimateMeritAid } from '../services/meritAidEngine.js';
-import { project4YearCost } from '../services/projectionEngine.js';
+import { estimateMeritAid } from '../services/meritAidEngine';
+import { project4YearCost } from '../services/projectionEngine';
 
 const router = Router();
 const prisma = new PrismaClient();
