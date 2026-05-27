@@ -1,0 +1,201 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  clerkId         String    @unique
+  email           String    @unique
+  role            String    @default("ATHLETE") // ATHLETE, PARENT, CONSULTANT
+  birthDate       DateTime?
+  parentConsent   Boolean   @default(false)
+  consentDate     DateTime?
+  stateCode       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  athlete         Athlete?
+  parent          Parent?
+  household       Household?
+}
+
+model Household {
+  id              String    @id @default(cuid())
+  name            String
+  parentUserId    String    @unique
+  parent          User      @relation(fields: [parentUserId], references: [id])
+  athletes        Athlete[]
+  annualBudget    Float?
+  createdAt       DateTime  @default(now())
+}
+
+model Parent {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  firstName       String
+  lastName        String
+}
+
+model Athlete {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  householdId     String?
+  household       Household? @relation(fields: [householdId], references: [id])
+  firstName       String
+  lastName        String
+  sport           String
+  gradYear        Int
+  gpa             Float?
+  actScore        Int?
+  satScore        Int?
+  stateResident   String?
+  budgetGoal      Float?
+  influenceDisclosureAcknowledged Boolean @default(false)
+
+  expenses           Expense[]
+  coachContacts      CoachContact[]
+  expenseContactLinks ExpenseContactLink[]
+  socialProfiles     SocialProfile[]
+  offers             CollegeOffer[]
+  milestones         Milestone[]
+  streakLog          StreakLog[]
+  brandReadiness     BrandReadinessScore?
+}
+
+model Expense {
+  id              String          @id @default(cuid())
+  athleteId       String
+  athlete         Athlete         @relation(fields: [athleteId], references: [id])
+  category        String // SHOWCASE_CAMP, TOURNAMENT_ENTRY, TRAVEL_AIRFARE, etc.
+  label           String
+  amount          Float
+  date            DateTime
+  notes           String?
+  receiptUrl      String?
+  createdAt       DateTime        @default(now())
+
+  contactLinks    ExpenseContactLink[]
+}
+
+model ExpenseContactLink {
+  id              String       @id @default(cuid())
+  expenseId       String
+  expense         Expense      @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  contactId       String
+  contact         CoachContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  athleteId       String
+  athlete         Athlete      @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([expenseId, contactId])
+}
+
+model CoachContact {
+  id              String       @id @default(cuid())
+  athleteId       String
+  athlete         Athlete      @relation(fields: [athleteId], references: [id])
+  schoolName      String
+  coachName       String?
+  coachEmail      String?
+  contactType     String // INITIAL_EMAIL_SENT, REPLY_RECEIVED, PHONE_CALL, OFFICIAL_VISIT, OFFER_EXTENDED
+  divisionTier    String // D1_POWER4, D1_MID_MAJOR, D2, D3, NAIA, JUCO
+  contactDate     DateTime
+  notes           String?
+  isVerbal        Boolean      @default(false)
+  expenseLinks    ExpenseContactLink[]
+  createdAt       DateTime     @default(now())
+}
+
+model SocialProfile {
+  id                String    @id @default(cuid())
+  athleteId         String
+  athlete           Athlete   @relation(fields: [athleteId], references: [id])
+  platform          String // INSTAGRAM, TIKTOK, TWITTER
+  handle            String
+  encryptedToken    String?
+  tokenExpiry       DateTime?
+  lastRefreshed     DateTime?
+  lastRefreshError  String?
+  followerCount     Int       @default(0)
+  followingCount    Int       @default(0)
+  avgEngagementRate Float     @default(0)
+  monthlyGrowthRate Float     @default(0)
+  snapshots         SocialSnapshot[]
+}
+
+model SocialSnapshot {
+  id              String        @id @default(cuid())
+  profileId       String
+  profile         SocialProfile @relation(fields: [profileId], references: [id])
+  snapshotDate    DateTime      @default(now())
+  followerCount   Int
+  avgLikes        Float
+  avgComments     Float
+  avgShares       Float
+  engagementRate  Float
+  estimatedReach  Int
+}
+
+model BrandReadinessScore {
+  id              String   @id @default(cuid())
+  athleteId       String   @unique
+  athlete         Athlete  @relation(fields: [athleteId], references: [id])
+  score           Int
+  tier            String
+  followersNeeded Int
+  engagementTarget Float
+  checklistJson   String
+  lastCalculated  DateTime @default(now())
+}
+
+model CollegeOffer {
+  id                      String      @id @default(cuid())
+  athleteId               String
+  athlete                 Athlete     @relation(fields: [athleteId], references: [id])
+  schoolName              String
+  ipedsUnitId             String?
+  division                String // D1, D2, D3, NAIA, JUCO
+  conferenceOrProgram     String?
+  athleticScholarshipPct  Float
+  meritAidRangeLow        Float
+  meritAidRangeHigh       Float
+  meritAidOverride        Float?
+  annualCOA               Float
+  coaDataYear             Int
+  tuition                 Float
+  roomAndBoard            Float
+  otherFees               Float
+  expectedAnnualContrib   Float       @default(0)
+  status                  String      @default("INTERESTED") // INTERESTED, OFFER_RECEIVED, OFFICIAL_VISIT_SCHEDULED, COMMITTED, DECLINED, WITHDRAWN
+  isVerbal                Boolean     @default(false)
+  confidenceLevel         String      @default("SPECULATIVE") // SPECULATIVE, VERBAL, WRITTEN, SIGNED
+  notes                   String?
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+}
+
+model Milestone {
+  id          String          @id @default(cuid())
+  athleteId   String
+  athlete     Athlete         @relation(fields: [athleteId], references: [id])
+  type        String // FIRST_EXPENSE_LOGGED, FIRST_COACH_REPLY, FIRST_OFFER_ADDED, etc.
+  unlockedAt  DateTime        @default(now())
+  metadata    String?
+}
+
+model StreakLog {
+  id          String   @id @default(cuid())
+  athleteId   String
+  athlete     Athlete  @relation(fields: [athleteId], references: [id])
+  date        DateTime
+  action      String   // "expense_logged", "contact_logged", "offer_updated"
+}

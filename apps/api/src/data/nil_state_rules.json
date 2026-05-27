@@ -1,0 +1,47 @@
+{
+  "GA": {
+    "stateCode": "GA",
+    "permitted": true,
+    "restrictions": ["Cannot use school name, logo, or likeness without institutional approval"],
+    "minorPermitted": true,
+    "sourceUrl": "https://www.ghsa.net/nil-guidance",
+    "lastVerified": "2025-09-01",
+    "lastLegislativeChange": "2021-06-07"
+  },
+  "TX": {
+    "stateCode": "TX",
+    "permitted": false,
+    "restrictions": [],
+    "minorPermitted": false,
+    "sourceUrl": "https://www.uiltexas.org/athletics/forms",
+    "lastVerified": "2025-09-01",
+    "lastLegislativeChange": "2023-01-01"
+  },
+  "CA": {
+    "stateCode": "CA",
+    "permitted": true,
+    "restrictions": [],
+    "minorPermitted": true,
+    "sourceUrl": "https://www.ncaa.org/",
+    "lastVerified": "2025-09-01",
+    "lastLegislativeChange": "2023-01-01"
+  },
+  "FL": {
+    "stateCode": "FL",
+    "permitted": true,
+    "restrictions": [],
+    "minorPermitted": true,
+    "sourceUrl": "https://www.fhsaa.org/",
+    "lastVerified": "2025-09-01",
+    "lastLegislativeChange": "2021-07-01"
+  },
+  "OH": {
+    "stateCode": "OH",
+    "permitted": true,
+    "restrictions": [],
+    "minorPermitted": true,
+    "sourceUrl": "https://www.ohsaa.org/",
+    "lastVerified": "2025-09-01",
+    "lastLegislativeChange": "2021-08-01"
+  }
+}

@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Syne:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-bg-primary text-text-primary font-syne;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-syne font-bold;
+  }
+
+  .display-value {
+    @apply font-playfair font-bold;
+  }
+
+  .numeric-data {
+    @apply font-mono;
+  }
+}
+
+@layer components {
+  .metric-card {
+    @apply bg-bg-secondary border border-border-color rounded-lg p-6 hover:bg-bg-elevated transition-colors;
+  }
+
+  .metric-card-accent-gold {
+    @apply metric-card border-l-4 border-l-gold;
+  }
+
+  .metric-card-accent-teal {
+    @apply metric-card border-l-4 border-l-teal;
+  }
+
+  .metric-card-accent-green {
+    @apply metric-card border-l-4 border-l-green;
+  }
+
+  .btn-primary {
+    @apply bg-gold hover:bg-yellow text-bg-primary font-semibold py-2 px-4 rounded-lg transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-bg-elevated border border-border-bright text-text-primary font-semibold py-2 px-4 rounded-lg hover:bg-border-color transition-colors;
+  }
+
+  .card {
+    @apply bg-bg-secondary border border-border-color rounded-lg p-6;
+  }
+
+  .card-interactive {
+    @apply card hover:bg-bg-elevated cursor-pointer transition-colors;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-bg-secondary;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-border-bright rounded-full hover:bg-border-bright;
+}
