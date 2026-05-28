@@ -35,7 +35,7 @@ interface ProfileContextType {
   currentProfile: AthleteProfile | null;
   createProfile: (profile: CreateProfileInput) => Promise<AthleteProfile>;
   updateProfile: (updates: Partial<CreateProfileInput>) => Promise<AthleteProfile>;
-  clearProfile: () => void;
+  clearProfile: () => Promise<void>;
   isLoading: boolean;
   error: string | null;
 }
@@ -101,9 +101,11 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const clearProfile = () => {
+  const clearProfile = async (): Promise<void> => {
     setCurrentProfile(null);
     setError(null);
+    // Return a promise that resolves after state updates are scheduled
+    return Promise.resolve();
   };
 
   return (

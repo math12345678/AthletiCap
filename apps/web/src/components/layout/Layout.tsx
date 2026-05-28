@@ -46,15 +46,17 @@ export default function Layout({ children }: LayoutProps) {
     return current?.breadcrumb || 'DASHBOARD';
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem('authToken');
-    clearProfile();
-    navigate('/profile');
+    await clearProfile();
+    // Navigate with state indicating we're logging out
+    navigate('/profile', { state: { isLogout: true } });
   };
 
-  const handleSwitchProfile = () => {
-    clearProfile();
-    navigate('/profile');
+  const handleSwitchProfile = async () => {
+    await clearProfile();
+    // Navigate with state indicating we're switching profiles
+    navigate('/profile', { state: { isSwitching: true } });
   };
 
   // Group nav items by category

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -48,9 +48,32 @@ const US_STATES = [
 
 const ProfileSetup: React.FC = () => {
   const navigate = useNavigate();
-  const { currentProfile, createProfile, isLoading: contextLoading, error: contextError } = useProfile();
+  const location = useLocation();
+  const { currentProfile, createProfile, clearProfile, isLoading: contextLoading, error: contextError } = useProfile();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showSwitchMode, setShowSwitchMode] = useState(false);
+
+  // When navigating to /profile from the app, it's for profile switching
+  useEffect(() => {
+    // Check the location state to determine if we're switching or setting up
+    const state = location.state as { isSwitching?: boolean; isLogout?: boolean } | null;
+
+    if (state?.isSwitching) {
+      // User clicked "Profiles" button - show switch mode
+      setShowSwitchMode(true);
+    } else if (state?.isLogout) {
+      // User clicked "Sign Out" button - show setup mode
+      setShowSwitchMode(false);
+    } else {
+      // Direct navigation or page reload - use currentProfile to determine mode
+      if (currentProfile) {
+        setShowSwitchMode(true);
+      } else {
+        setShowSwitchMode(false);
+      }
+    }
+  }, [location]);
 
   const {
     register,
@@ -106,21 +129,19 @@ const ProfileSetup: React.FC = () => {
     );
   }
 
-  const isEditing = !!currentProfile;
-
   return (
     <Layout>
       <div className="max-w-2xl mx-auto py-12">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-playfair font-bold text-text-primary mb-2">
-              {isEditing ? 'Switch Profile' : 'Welcome to AthletiCap'}
+              {showSwitchMode ? 'Switch Profile' : 'Welcome to AthletiCap'}
             </h1>
             <p className="text-lg text-text-secondary">
-              {isEditing ? 'Create or select a different athlete profile' : 'Set up your profile to get started with recruitment tracking'}
+              {showSwitchMode ? 'Create or select a different athlete profile' : 'Set up your profile to get started with recruitment tracking'}
             </p>
           </div>
-          {isEditing && (
+          {showSwitchMode && (
             <button
               onClick={() => navigate('/')}
               className="px-4 py-2 border border-[#D8D5CC] text-[#1A1916] text-sm font-medium rounded-sm hover:bg-[#F4F3EF] transition-colors"
