@@ -101,6 +101,14 @@ const contacts = new Map<string, CoachContact[]>();
 const offers = new Map<string, SchoolOffer[]>();
 const milestones = new Map<string, Milestone[]>();
 
+interface SchoolWatchlistEntry {
+  schoolId: number;
+  addedAt: Date;
+  notes?: string;
+}
+
+const watchlist = new Map<string, SchoolWatchlistEntry[]>();
+
 let nextProfileId = 1;
 let nextExpenseId = 1;
 let nextContactId = 1;
@@ -777,6 +785,97 @@ app.get('/api/schools/matches', (req: any, res) => {
 
   const sorted = scored.sort((a, b) => b.fitScore - a.fitScore).slice(0, 50);
   res.json(sorted);
+});
+
+// ============================================================================
+// SCHOOL WATCHLIST ROUTES
+// ============================================================================
+
+app.post('/api/schools/watchlist', (req: any, res) => {
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { schoolId, notes } = req.body;
+  if (!schoolId) {
+    return res.status(400).json({ error: 'schoolId is required' });
+  }
+
+  if (!watchlist.has(userId)) {
+    watchlist.set(userId, []);
+  }
+
+  const userWatchlist = watchlist.get(userId)!;
+  // Check if already in watchlist
+  if (userWatchlist.some(w => w.schoolId === schoolId)) {
+    return res.status(409).json({ error: 'School already in watchlist' });
+  }
+
+  const entry: SchoolWatchlistEntry = {
+    schoolId,
+    addedAt: new Date(),
+    notes,
+  };
+
+  userWatchlist.push(entry);
+  res.status(201).json(entry);
+});
+
+app.delete('/api/schools/watchlist/:schoolId', (req: any, res) => {
+  const userId = req.userId;
+  const { schoolId } = req.params;
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+  const userWatchlist = watchlist.get(userId);
+  if (!userWatchlist) {
+    return res.status(404).json({ error: 'Watchlist not found' });
+  }
+
+  const index = userWatchlist.findIndex(w => w.schoolId === parseInt(schoolId));
+  if (index === -1) {
+    return res.status(404).json({ error: 'School not in watchlist' });
+  }
+
+  userWatchlist.splice(index, 1);
+  res.json({ success: true });
+});
+
+app.get('/api/schools/watchlist', (req: any, res) => {
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+  const profile = profiles.get(userId);
+  if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+  const userWatchlist = watchlist.get(userId) || [];
+
+  // Enhance watchlist entries with school data
+  const enhanced = userWatchlist.map(entry => {
+    const school = mockSchools.find(s => s.id === entry.schoolId);
+    if (!school) return null;
+
+    const { fitScore, estimatedNetCost } = calculateSchoolFitScore(profile, school);
+    return {
+      schoolId: entry.schoolId,
+      school: {
+        id: school.id.toString(),
+        name: school.name,
+        division: school.division,
+        state: school.state,
+        setting: school.setting,
+        GPATarget: school.gpaTarget,
+        athleticScholarshipPct: school.avgAthleticScholarshipPct,
+        estimatedCOA: estimatedNetCost,
+        acceptanceRate: school.acceptanceRate,
+      },
+      fitScore,
+      academicMatch: profile.gpa && profile.gpa >= (school.gpaTarget - 0.3) ? 'fit' : 'safety',
+      athleticMatch: school.avgAthleticScholarshipPct > 50 ? 'fit' : 'safety',
+      addedAt: entry.addedAt,
+      notes: entry.notes,
+    };
+  }).filter(Boolean);
+
+  res.json(enhanced);
 });
 
 // ============================================================================
