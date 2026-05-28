@@ -842,13 +842,52 @@ app.get('/api/milestones', (req: any, res) => {
     return b.gradYearOffsetMonths - a.gradYearOffsetMonths;
   });
 
-  res.json(sorted);
+  // Transform response to include dueDate, status, and progressPercent for frontend
+  const transformed = sorted.map(m => {
+    // Calculate due date from graduation year and offset months
+    const gradDate = new Date(profile.gradYear, 4, 1); // May 1st of graduation year
+    const dueDate = new Date(gradDate);
+    dueDate.setMonth(dueDate.getMonth() - m.gradYearOffsetMonths);
+
+    // Calculate status
+    let status = 'incomplete';
+    if (m.completedAt) {
+      status = 'complete';
+    } else if (dueDate < now) {
+      status = 'overdue';
+    }
+
+    // Calculate progress percentage (0-100)
+    const progressPercent = m.completedAt ? 100 : 0;
+
+    return {
+      id: m.id.toString(),
+      userId: m.userId,
+      title: m.title,
+      description: m.description,
+      sport: m.sport,
+      category: m.category,
+      priority: m.priority,
+      dueDate: dueDate.toISOString(),
+      status,
+      progressPercent,
+      completedAt: m.completedAt ? m.completedAt.toISOString() : undefined,
+      notes: m.notes,
+      createdAt: m.createdAt,
+      updatedAt: m.updatedAt,
+    };
+  });
+
+  res.json(transformed);
 });
 
 app.post('/api/milestones/:id/complete', (req: any, res) => {
   const userId = req.userId;
   const { id } = req.params;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+  const profile = profiles.get(userId);
+  if (!profile) return res.status(404).json({ error: 'Profile not found' });
 
   const userMilestones = milestones.get(userId) || [];
   const milestone = userMilestones.find(m => m.id === parseInt(id));
@@ -860,7 +899,29 @@ app.post('/api/milestones/:id/complete', (req: any, res) => {
   milestone.notes = req.body.notes;
   milestone.updatedAt = new Date();
 
-  res.json(milestone);
+  // Transform response to match frontend interface
+  const gradDate = new Date(profile.gradYear, 4, 1); // May 1st of graduation year
+  const dueDate = new Date(gradDate);
+  dueDate.setMonth(dueDate.getMonth() - milestone.gradYearOffsetMonths);
+
+  const transformed = {
+    id: milestone.id.toString(),
+    userId: milestone.userId,
+    title: milestone.title,
+    description: milestone.description,
+    sport: milestone.sport,
+    category: milestone.category,
+    priority: milestone.priority,
+    dueDate: dueDate.toISOString(),
+    status: 'complete',
+    progressPercent: 100,
+    completedAt: milestone.completedAt.toISOString(),
+    notes: milestone.notes,
+    createdAt: milestone.createdAt,
+    updatedAt: milestone.updatedAt,
+  };
+
+  res.json(transformed);
 });
 
 // ============================================================================
