@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { api } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import Layout from '../components/layout/Layout';
@@ -178,6 +179,38 @@ export default function OffersV2() {
     return years;
   };
 
+  // Generate 4-year projection data for all offers for chart comparison
+  const generateMultiOfferProjection = (offersArray: Offer[]): any[] => {
+    const years = [1, 2, 3, 4];
+    const projections: any[] = [];
+
+    years.forEach((year) => {
+      const yearData: any = { year };
+
+      offersArray.forEach((offer) => {
+        let currentCOA = offer.COA;
+        for (let i = 1; i < year; i++) {
+          currentCOA *= 1 + offer.tuitionInflationRate / 100;
+        }
+
+        const athleticScholar = currentCOA * (offer.athleticScholarshipPct / 100);
+        const meritAid =
+          offer.meritAidOverride ||
+          (offer.meritAidEstimate.low + offer.meritAidEstimate.high) / 2;
+        const netCost = Math.max(
+          0,
+          currentCOA - athleticScholar - meritAid + offer.annualContribution
+        );
+
+        yearData[offer.schoolName] = netCost;
+      });
+
+      projections.push(yearData);
+    });
+
+    return projections;
+  };
+
   const getBestOffer = (): Offer | null => {
     if (offers.length === 0) return null;
     const qualifyingOffers = offers.filter(
@@ -286,6 +319,67 @@ export default function OffersV2() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* 4-Year Cost Projection Chart */}
+        {offers.length > 1 && (
+          <div className="bg-white border border-[#D8D5CC] rounded-sm p-6">
+            <h3 className="text-sm font-semibold text-[#5C5A54] uppercase mb-4">
+              4-Year Cost Projection Comparison
+            </h3>
+            <ResponsiveContainer width="100%" height={350}>
+              <LineChart
+                data={generateMultiOfferProjection(offers)}
+                margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                <XAxis
+                  dataKey="year"
+                  label={{ value: 'Year', position: 'insideBottomRight', offset: -5 }}
+                  tick={{ fill: '#5C5A54', fontSize: 12 }}
+                />
+                <YAxis
+                  tick={{ fill: '#5C5A54', fontSize: 12 }}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+                  label={{ value: 'Net Annual Cost', angle: -90, position: 'insideLeft' }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #D8D5CC',
+                    borderRadius: '4px',
+                  }}
+                  formatter={(value) => `$${(value as number).toLocaleString()}`}
+                  labelStyle={{ color: '#1A1916' }}
+                />
+                <Legend />
+                {offers.map((offer, idx) => {
+                  const colors = [
+                    '#1A56DB',
+                    '#8B5CF6',
+                    '#06B6D4',
+                    '#10B981',
+                    '#F59E0B',
+                  ];
+                  return (
+                    <Line
+                      key={offer.id}
+                      type="monotone"
+                      dataKey={offer.schoolName}
+                      stroke={colors[idx % colors.length]}
+                      dot={{ fill: colors[idx % colors.length] }}
+                      strokeWidth={2}
+                      animationDuration={500}
+                      connectNulls
+                    />
+                  );
+                })}
+              </LineChart>
+            </ResponsiveContainer>
+            <p className="text-xs text-[#8A8783] mt-4">
+              Shows projected annual net cost (COA minus scholarships and aid, adjusted for tuition inflation)
+            </p>
           </div>
         )}
 
