@@ -3,6 +3,7 @@ import { api } from '../lib/api';
 import Layout from '../components/layout/Layout';
 import { useToast } from '../components/ui';
 import clsx from 'clsx';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface Milestone {
   id: string;
@@ -193,21 +194,23 @@ export default function MilestonesV2() {
     );
   }
 
+  // Prepare data for status distribution chart
+  const statusData = [
+    { name: 'Completed', value: completedCount, fill: '#2DD09A' },
+    { name: 'In Progress', value: incompleteCount, fill: '#1A56DB' },
+    { name: 'Overdue', value: overdueCount, fill: '#C0392B' },
+  ].filter((item) => item.value > 0);
+
   return (
     <Layout>
       <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-5xl font-serif font-bold text-[#1A1916] mb-2">
-            Recruitment Milestones
-          </h1>
-          <p className="text-[#5C5A54]">
-            Track your progress through the recruitment process
-          </p>
-        </div>
+        {/* Section 1: Milestone Progress */}
+        <section>
+          <h2 className="section-header mb-6">
+            <span className="section-number"># [1]</span> RECRUITMENT MILESTONE TRACKER
+          </h2>
 
-        {/* Progress Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Overall Progress */}
           <div className="bg-white border border-[#D8D5CC] rounded-sm p-6">
             <div className="text-[#8A8783] text-xs font-medium uppercase mb-2">
@@ -268,10 +271,39 @@ export default function MilestonesV2() {
             </div>
             <p className="text-xs text-[#5C5A54] mt-3">Great job! Keep it up</p>
           </div>
-        </div>
+        </section>
 
-        {/* Filters & Sort */}
-        <div className="bg-white border border-[#D8D5CC] rounded-sm p-4 flex gap-4 items-center flex-wrap">
+        {/* Section 2: Status Distribution */}
+        {statusData.length > 0 && (
+          <section className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-6">
+            <h3 className="section-header mb-6">
+              <span className="section-number"># [2]</span> MILESTONE STATUS DISTRIBUTION
+            </h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={statusData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#D8D5CC" />
+                <XAxis dataKey="name" stroke="#5C5A54" />
+                <YAxis stroke="#5C5A54" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #D8D5CC',
+                    borderRadius: '2px',
+                  }}
+                />
+                <Bar dataKey="value" fill="#1A56DB" radius={[2, 2, 0, 0]}>
+                  {statusData.map((entry, index) => (
+                    <Bar key={`bar-${index}`} dataKey="value" fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </section>
+        )}
+
+        {/* Section 3: Filters & Sort */}
+        <section>
+          <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4 flex gap-4 items-center flex-wrap">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-[#5C5A54]">
               Filter:
@@ -307,10 +339,15 @@ export default function MilestonesV2() {
             </select>
           </div>
         </div>
+        </section>
 
-        {/* Milestones List */}
-        {displayedMilestones.length > 0 ? (
-          <div className="space-y-3">
+        {/* Section 4: Milestones List */}
+        <section>
+          <h3 className="section-header mb-6">
+            <span className="section-number"># [3]</span> ACTIVE MILESTONES
+          </h3>
+          {displayedMilestones.length > 0 ? (
+            <div className="space-y-3">
             {displayedMilestones.map((milestone) => (
               <div
                 key={milestone.id}
@@ -435,21 +472,22 @@ export default function MilestonesV2() {
               </div>
             ))}
           </div>
-        ) : (
-          <div className="bg-white border border-[#D8D5CC] rounded-sm p-12 text-center">
-            <p className="text-lg text-[#5C5A54] mb-6">
-              {filterStatus === 'all'
-                ? 'No milestones yet. Start tracking your progress through recruitment!'
-                : `No ${filterStatus} milestones to show.`}
-            </p>
-          </div>
-        )}
+          ) : (
+            <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-12 text-center">
+              <p className="text-lg text-[#5C5A54] mb-6">
+                {filterStatus === 'all'
+                  ? 'No milestones yet. Start tracking your progress through recruitment!'
+                  : `No ${filterStatus} milestones to show.`}
+              </p>
+            </div>
+          )}
+        </section>
 
-        {/* Upcoming Timeline Section */}
+        {/* Section 4: Upcoming Timeline */}
         {milestones.length > 0 && (
-          <div className="bg-white border border-[#D8D5CC] rounded-sm p-6">
-            <h3 className="text-lg font-semibold text-[#1A1916] mb-4">
-              Next 30 Days
+          <section className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-6">
+            <h3 className="section-header mb-4">
+              <span className="section-number"># [4]</span> NEXT 30 DAYS
             </h3>
             <div className="space-y-2">
               {sortMilestones(
@@ -480,7 +518,7 @@ export default function MilestonesV2() {
                   </div>
                 ))}
             </div>
-          </div>
+          </section>
         )}
       </div>
 
