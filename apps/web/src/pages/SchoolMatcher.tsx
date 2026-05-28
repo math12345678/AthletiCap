@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { api } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import Layout from '../components/layout/Layout';
 import { useToast } from '../components/ui';
+import { FitScoreDistributionChart, calculateFitScoreDistribution } from '../components/charts/FitScoreChart';
+import { DIVISION_COLORS } from '../lib/chart-colors';
 import clsx from 'clsx';
 
 interface School {
@@ -175,6 +178,36 @@ export default function SchoolMatcher() {
   ];
   const settingOptions = ['Urban', 'Suburban', 'Rural'];
 
+  // Calculate division breakdown for chart
+  const calculateDivisionBreakdown = (schools: School[]) => {
+    const divisionOptions = [
+      'D1 Power 4',
+      'D1 Mid-Major',
+      'D2',
+      'D3',
+      'NAIA',
+      'JUCO',
+    ];
+
+    return divisionOptions.map((division) => {
+      const divisionSchools = schools.filter((s) => s.division === division);
+      const avgFitScore =
+        divisionSchools.length > 0
+          ? Math.round(
+              divisionSchools.reduce((sum, s) => sum + s.fitScore, 0) /
+                divisionSchools.length
+            )
+          : 0;
+
+      return {
+        division,
+        count: divisionSchools.length,
+        avgFitScore,
+        color: DIVISION_COLORS[division] || '#9CA3AF',
+      };
+    });
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -294,6 +327,66 @@ export default function SchoolMatcher() {
           Showing <span className="font-semibold">{filteredSchools.length}</span>{' '}
           {filteredSchools.length === 1 ? 'school' : 'schools'}
         </div>
+
+        {/* Analytics Charts */}
+        {filteredSchools.length > 0 && (
+          <div className="space-y-6">
+            {/* Fit Score Distribution */}
+            <div className="bg-white border border-[#D8D5CC] rounded-sm p-6">
+              <FitScoreDistributionChart
+                data={calculateFitScoreDistribution(filteredSchools)}
+                height={300}
+                title="Fit Score Distribution"
+              />
+            </div>
+
+            {/* Schools by Division */}
+            <div className="bg-white border border-[#D8D5CC] rounded-sm p-6">
+              <h3 className="text-sm font-semibold text-[#5C5A54] uppercase mb-4">
+                Schools by Division
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={calculateDivisionBreakdown(filteredSchools)}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis
+                    dataKey="division"
+                    tick={{ fill: '#5C5A54', fontSize: 12 }}
+                  />
+                  <YAxis
+                    tick={{ fill: '#5C5A54', fontSize: 12 }}
+                    label={{ value: 'Count', angle: -90, position: 'insideLeft' }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#FFFFFF',
+                      border: '1px solid #D8D5CC',
+                      borderRadius: '4px',
+                    }}
+                    formatter={(value) => [value, 'Schools']}
+                    labelStyle={{ color: '#1A1916' }}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="count"
+                    fill="#3B82F6"
+                    radius={[4, 4, 0, 0]}
+                    animationDuration={500}
+                  />
+                  <Bar
+                    dataKey="avgFitScore"
+                    fill="#F59E0B"
+                    radius={[4, 4, 0, 0]}
+                    animationDuration={500}
+                    name="Avg Fit Score"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
 
         {/* Schools Grid */}
         {filteredSchools.length > 0 ? (
