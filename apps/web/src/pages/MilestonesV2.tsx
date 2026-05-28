@@ -271,6 +271,7 @@ export default function MilestonesV2() {
             </div>
             <p className="text-xs text-[#5C5A54] mt-3">Great job! Keep it up</p>
           </div>
+          </div>
         </section>
 
         {/* Section 2: Status Distribution */}
