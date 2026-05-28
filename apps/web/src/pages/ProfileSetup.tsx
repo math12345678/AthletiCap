@@ -49,7 +49,7 @@ const US_STATES = [
 const ProfileSetup: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentProfile, createProfile, clearProfile, isLoading: contextLoading, error: contextError } = useProfile();
+  const { currentProfile, createProfile, updateProfile, clearProfile, isLoading: contextLoading, error: contextError } = useProfile();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showSwitchMode, setShowSwitchMode] = useState(false);
@@ -109,13 +109,20 @@ const ProfileSetup: React.FC = () => {
         testOptional: data.testOptional,
       };
 
-      await createProfile(profileInput);
-      // Profile created successfully, navigate to dashboard
+      // If in switch mode (isSwitching flag from location state), always update
+      // because we navigated here to modify the existing profile
+      if (showSwitchMode) {
+        await updateProfile(profileInput);
+      } else {
+        await createProfile(profileInput);
+      }
+
+      // Profile created/updated successfully, navigate to dashboard
       navigate('/');
     } catch (err) {
       const errorMsg = (err as Error).message;
-      setSubmitError(errorMsg || 'Failed to create profile. Please try again.');
-      console.error('Profile creation error:', err);
+      setSubmitError(errorMsg || 'Failed to save profile. Please try again.');
+      console.error('Profile save error:', err);
     } finally {
       setIsSubmitting(false);
     }
