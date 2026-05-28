@@ -40,20 +40,30 @@ export const api = {
     onboarding: (data: any) => apiRequest('POST', '/api/auth/onboarding', data),
   },
 
+  // Profile
+  profile: {
+    get: () => apiRequest('GET', '/api/profile'),
+    create: (data: any) => apiRequest('POST', '/api/profile', data),
+    update: (data: any) => apiRequest('PATCH', '/api/profile', data),
+  },
+
   // Expenses
   expenses: {
-    list: (skip = 0, take = 25) =>
-      apiRequest('GET', `/api/expenses?skip=${skip}&take=${take}`),
+    list: () => apiRequest('GET', '/api/expenses'),
     create: (data: any) => apiRequest('POST', '/api/expenses', data),
     update: (id: string, data: any) => apiRequest('PATCH', `/api/expenses/${id}`, data),
-    getSummary: () => apiRequest('GET', '/api/expenses/summary'),
+    delete: (id: string) => apiRequest('DELETE', `/api/expenses/${id}`),
+    getByCategorySum: () => apiRequest('GET', '/api/expenses/summary/by-category'),
+    getAdvisor: () => apiRequest('GET', '/api/expenses/advisor'),
   },
 
   // Contacts
   contacts: {
     list: () => apiRequest('GET', '/api/contacts'),
     create: (data: any) => apiRequest('POST', '/api/contacts', data),
-    getCAC: () => apiRequest('GET', '/api/contacts/cac'),
+    update: (id: string, data: any) => apiRequest('PATCH', `/api/contacts/${id}`, data),
+    delete: (id: string) => apiRequest('DELETE', `/api/contacts/${id}`),
+    getPipelineSummary: () => apiRequest('GET', '/api/contacts/summary/pipeline'),
   },
 
   // Offers
@@ -61,10 +71,8 @@ export const api = {
     list: () => apiRequest('GET', '/api/offers'),
     create: (data: any) => apiRequest('POST', '/api/offers', data),
     update: (id: string, data: any) => apiRequest('PATCH', `/api/offers/${id}`, data),
-    getProjection: (id: string, coaInflationRate = 0.04) =>
-      apiRequest('GET', `/api/offers/${id}/projection?coaInflationRate=${coaInflationRate}`),
-    compare: (ids: string[], coaInflationRate = 0.04) =>
-      apiRequest('GET', `/api/offers/compare?ids=${ids.join(',')}&coaInflationRate=${coaInflationRate}`),
+    delete: (id: string) => apiRequest('DELETE', `/api/offers/${id}`),
+    commit: (id: string) => apiRequest('POST', `/api/offers/${id}/commit`),
   },
 
   // Influence
@@ -78,6 +86,30 @@ export const api = {
 
   // Dashboard
   dashboard: {
-    get: () => apiRequest('GET', '/api/dashboard'),
+    getSummary: () => apiRequest('GET', '/api/dashboard/summary'),
+    getPrediction: () => apiRequest('GET', '/api/dashboard/prediction'),
+  },
+
+  // Schools/Matching
+  schools: {
+    getMatches: (params?: { division?: string; state?: string; setting?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.division) query.append('division', params.division);
+      if (params?.state) query.append('state', params.state);
+      if (params?.setting) query.append('setting', params.setting);
+      const queryStr = query.toString();
+      return apiRequest('GET', `/api/schools/matches${queryStr ? '?' + queryStr : ''}`);
+    },
+  },
+
+  // Milestones
+  milestones: {
+    list: () => apiRequest('GET', '/api/milestones'),
+    complete: (id: string, data?: any) => apiRequest('POST', `/api/milestones/${id}/complete`, data || {}),
+  },
+
+  // Budget Advisor
+  budgetAdvisor: {
+    getAnalysis: () => apiRequest('GET', '/api/expenses/advisor'),
   },
 };

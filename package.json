@@ -2,17 +2,22 @@
   "name": "athleticap",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "pnpm --filter web dev & pnpm --filter api dev",
-    "build": "pnpm --filter db build && pnpm --filter web build && pnpm --filter api build",
-    "db:push": "pnpm --filter db push",
-    "db:seed": "pnpm --filter db seed"
+    "dev": "npm run dev --workspace=apps/api & npm run dev --workspace=apps/web",
+    "build": "npm run build --workspaces",
+    "db:push": "npm run push --workspace=packages/db",
+    "db:seed": "npm run seed --workspace=packages/db"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@tailwindcss/forms": "^0.5.11",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.9.1",

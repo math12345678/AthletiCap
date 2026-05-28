@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../lib/api';
+import { api } from '../lib/api';
 import { useToast } from '../components/ui';
 
 /**
@@ -8,7 +8,7 @@ import { useToast } from '../components/ui';
 export const useDashboard = () => {
   return useQuery({
     queryKey: ['dashboard'],
-    queryFn: () => apiClient.dashboard.getMetrics(),
+    queryFn: () => api.dashboard.getSummary(),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
@@ -19,7 +19,7 @@ export const useDashboard = () => {
 export const useExpenses = () => {
   return useQuery({
     queryKey: ['expenses'],
-    queryFn: () => apiClient.expenses.getList(),
+    queryFn: () => api.expenses.list(),
   });
 };
 
@@ -29,7 +29,7 @@ export const useExpenses = () => {
 export const useContacts = () => {
   return useQuery({
     queryKey: ['contacts'],
-    queryFn: () => apiClient.contacts.getList(),
+    queryFn: () => api.contacts.list(),
   });
 };
 
@@ -39,17 +39,7 @@ export const useContacts = () => {
 export const useOffers = () => {
   return useQuery({
     queryKey: ['offers'],
-    queryFn: () => apiClient.offers.getList(),
-  });
-};
-
-/**
- * Hook for fetching brand readiness
- */
-export const useBrandReadiness = (athleteId: string) => {
-  return useQuery({
-    queryKey: ['brandReadiness', athleteId],
-    queryFn: () => apiClient.influence.calculateBrandReadiness(athleteId),
+    queryFn: () => api.offers.list(),
   });
 };
 
@@ -61,8 +51,8 @@ export const useCreateExpense = () => {
   const { addToast } = useToast();
 
   return useMutation({
-    mutationFn: (data: Parameters<typeof apiClient.expenses.create>[0]) =>
-      apiClient.expenses.create(data),
+    mutationFn: (data: Parameters<typeof api.expenses.create>[0]) =>
+      api.expenses.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -82,8 +72,8 @@ export const useCreateContact = () => {
   const { addToast } = useToast();
 
   return useMutation({
-    mutationFn: (data: Parameters<typeof apiClient.contacts.create>[0]) =>
-      apiClient.contacts.create(data),
+    mutationFn: (data: Parameters<typeof api.contacts.create>[0]) =>
+      api.contacts.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -103,8 +93,8 @@ export const useCreateOffer = () => {
   const { addToast } = useToast();
 
   return useMutation({
-    mutationFn: (data: Parameters<typeof apiClient.offers.create>[0]) =>
-      apiClient.offers.create(data),
+    mutationFn: (data: Parameters<typeof api.offers.create>[0]) =>
+      api.offers.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['offers'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });

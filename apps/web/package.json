@@ -22,8 +22,7 @@
     "framer-motion": "^10.16.16",
     "@react-pdf/renderer": "^3.4.0",
     "@headlessui/react": "^1.7.17",
-    "clsx": "^2.0.0",
-    "zustand": "^4.4.1"
+    "clsx": "^2.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",

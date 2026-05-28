@@ -127,9 +127,8 @@ export const CoachContactForm: React.FC<CoachContactFormProps> = ({
 
       {/* Notes */}
       <Input
-        label="Notes"
+        label="Notes (Optional)"
         placeholder="Details about the contact..."
-        as="textarea"
         error={errors.notes?.message}
         {...register('notes')}
       />

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
+import { useProfile } from '../contexts/ProfileContext';
 import Layout from '../components/layout/Layout';
 import { MetricCard } from '../components/dashboard/MetricCard';
 import { Card, CardHeader, CardBody, Badge, Button, Loader } from '../components/ui';
@@ -27,6 +28,7 @@ interface DashboardData {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { currentProfile } = useProfile();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,17 +36,40 @@ export default function Dashboard() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const dashboardData = await api.dashboard.get();
+        const dashboardData = await api.dashboard.getSummary();
         setData(dashboardData);
       } catch (err) {
-        setError((err as Error).message);
+        const errorMsg = (err as Error).message;
+        // If athlete not found, use mock data based on current profile
+        if (errorMsg.includes('Athlete not found') || errorMsg.includes('404')) {
+          if (currentProfile) {
+            setData({
+              athlete: {
+                firstName: currentProfile.athleteName || 'Student',
+                sport: currentProfile.sport,
+                gradYear: currentProfile.gradYear,
+              },
+              totalSpend: 0,
+              budgetGoal: currentProfile.budgetGoal || 10000,
+              contactCount: 0,
+              recentOffers: [],
+              topDivisionTier: undefined,
+              lowestNetCostOffer: undefined,
+              brandReadiness: { score: 0, tier: 'Emerging' },
+            });
+          } else {
+            setError(errorMsg);
+          }
+        } else {
+          setError(errorMsg);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, []);
+  }, [currentProfile]);
 
   if (loading) {
     return (
@@ -83,6 +108,10 @@ export default function Dashboard() {
   const budgetPercent = data.budgetGoal ? (data.totalSpend / data.budgetGoal) * 100 : 0;
   const spendTrend = 12; // Example: 12% increase from last month
 
+  const athleteName = currentProfile?.athleteName || athlete.firstName || 'Student';
+  const sport = currentProfile?.sport || athlete.sport || '';
+  const gradYear = currentProfile?.gradYear || athlete.gradYear || new Date().getFullYear();
+
   return (
     <Layout>
       <div className="space-y-8">
@@ -93,10 +122,10 @@ export default function Dashboard() {
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h1 className="text-4xl font-playfair font-bold text-text-primary mb-2">
-                  Welcome back, {athlete.firstName}
+                  Welcome back, {athleteName}
                 </h1>
                 <p className="text-lg text-text-secondary">
-                  {athlete.sport} • Class of {athlete.gradYear}
+                  {sport} • Class of {gradYear}
                 </p>
               </div>
               <div className="text-5xl">🎯</div>

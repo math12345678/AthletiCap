@@ -10,8 +10,7 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@athleticap/db": "*",
-    "@clerk/express": "^0.6.1",
+    "@athleticap/db": "file:../../packages/db",
     "@prisma/client": "^5.7.1",
     "cors": "^2.8.5",
     "express": "^4.18.2",

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useIsMobile } from '../../hooks';
+import { useProfile } from '../../contexts/ProfileContext';
 import { Button } from '../ui';
 import clsx from 'clsx';
 
@@ -9,18 +10,19 @@ interface LayoutProps {
 }
 
 const navItems = [
-  { label: 'Dashboard', path: '/', icon: '📊', category: 'main' },
-  { label: 'Tracker', path: '/tracker', icon: '📝', category: 'main' },
-  { label: 'Offers', path: '/offers', icon: '💰', category: 'main' },
-  { label: 'Brand', path: '/influence', icon: '⭐', category: 'main' },
-  { label: 'Analytics', path: '/analytics', icon: '📈', category: 'tools' },
-  { label: 'Milestones', path: '/milestones', icon: '🎯', category: 'tools' },
-  { label: 'Settings', path: '/settings', icon: '⚙️', category: 'account' },
+  { label: 'Mission Control', path: '/', icon: '📊', category: 'main', breadcrumb: 'DASHBOARD' },
+  { label: 'Recruitment CapEx', path: '/tracker', icon: '📝', category: 'main', breadcrumb: 'EXPENSES' },
+  { label: 'Coach Intelligence', path: '/contacts', icon: '👥', category: 'main', breadcrumb: 'CONTACTS' },
+  { label: 'School Offers', path: '/offers', icon: '💰', category: 'planning', breadcrumb: 'OFFERS' },
+  { label: 'School Matcher', path: '/school-matcher', icon: '🎓', category: 'planning', breadcrumb: 'MATCHER' },
+  { label: 'Budget Advisor', path: '/budget-advisor', icon: '💡', category: 'planning', breadcrumb: 'BUDGET' },
+  { label: 'Milestones', path: '/milestones', icon: '🎯', category: 'planning', breadcrumb: 'MILESTONES' },
+  { label: 'Settings', path: '/settings', icon: '⚙️', category: 'account', breadcrumb: 'SETTINGS' },
 ];
 
 const categories = {
-  main: 'Core Features',
-  tools: 'Tools',
+  main: 'Financial Tools',
+  planning: 'Analysis & Planning',
   account: 'Account',
 };
 
@@ -28,13 +30,28 @@ export default function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
+  const { currentProfile } = useProfile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    if (path.includes('?')) {
+      return location.pathname === path.split('?')[0] && location.search === `?${path.split('?')[1]}`;
+    }
+    return location.pathname === path;
+  };
+
+  const getCurrentBreadcrumb = () => {
+    const current = navItems.find((item) => isActive(item.path));
+    return current?.breadcrumb || 'DASHBOARD';
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     navigate('/login');
+  };
+
+  const handleSwitchProfile = () => {
+    navigate('/profile');
   };
 
   // Group nav items by category
@@ -44,16 +61,16 @@ export default function Layout({ children }: LayoutProps) {
   }));
 
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#FAFAF8] flex flex-col md:flex-row">
       {/* Mobile Header */}
       {isMobile && (
-        <header className="bg-bg-secondary border-b border-border-color px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-playfair text-gold font-bold">AthletiCap</h1>
+        <header className="bg-[#F4F3EF] border-b border-[#D8D5CC] px-4 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-serif text-[#1A56DB] font-bold">AthletiCap</h1>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-bg-elevated rounded-lg transition-colors"
+            className="p-2 hover:bg-[#FFFFFF] rounded-sm transition-colors"
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-6 w-6 text-[#1A1916]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -68,16 +85,16 @@ export default function Layout({ children }: LayoutProps) {
       {/* Sidebar */}
       <aside
         className={clsx(
-          'bg-bg-secondary border-r border-border-color flex flex-col transition-all duration-300 fixed md:relative md:translate-x-0 h-screen md:h-auto',
+          'bg-[#F4F3EF] border-r border-[#D8D5CC] flex flex-col transition-all duration-300 fixed md:relative md:translate-x-0 h-screen md:h-auto',
           isMobile && sidebarOpen ? 'translate-x-0 w-64 z-40' : 'translate-x-full md:translate-x-0',
           !isMobile && 'w-72'
         )}
       >
         {/* Logo */}
         {!isMobile && (
-          <div className="p-6 border-b border-border-color">
-            <h1 className="text-2xl font-playfair text-gold font-bold">AthletiCap</h1>
-            <p className="text-xs text-text-secondary mt-1">Financial Dashboard for Athletes</p>
+          <div className="p-6 border-b border-[#D8D5CC]">
+            <h1 className="text-2xl font-serif text-[#1A56DB] font-bold">AthletiCap</h1>
+            <p className="text-xs text-[#5C5A54] mt-1">Recruitment Intelligence Platform</p>
           </div>
         )}
 
@@ -85,7 +102,7 @@ export default function Layout({ children }: LayoutProps) {
         <nav className="flex-1 p-6 space-y-8 overflow-y-auto">
           {groupedNav.map((group) => (
             <div key={group.label}>
-              <h2 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3 px-2">
+              <h2 className="text-xs font-semibold text-[#5C5A54] uppercase tracking-wider mb-3 px-2">
                 {group.label}
               </h2>
               <div className="space-y-1">
@@ -97,10 +114,10 @@ export default function Layout({ children }: LayoutProps) {
                       if (isMobile) setSidebarOpen(false);
                     }}
                     className={clsx(
-                      'w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center gap-3 font-medium',
+                      'w-full text-left px-4 py-3 rounded-sm transition-all duration-200 flex items-center gap-3 font-medium text-sm',
                       isActive(item.path)
-                        ? 'bg-gold text-bg-primary shadow-lg'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated'
+                        ? 'bg-[#1A56DB] text-white'
+                        : 'text-[#5C5A54] hover:text-[#1A1916] hover:bg-[#FFFFFF]'
                     )}
                   >
                     <span className="text-lg">{item.icon}</span>
@@ -113,26 +130,37 @@ export default function Layout({ children }: LayoutProps) {
         </nav>
 
         {/* Footer */}
-        <div className="p-6 border-t border-border-color space-y-3">
-          <div className="text-xs text-text-secondary px-2 py-2">
-            <p className="font-semibold text-text-primary">Sofia Rodriguez</p>
-            <p className="text-text-muted">17 • Athlete</p>
+        <div className="p-6 border-t border-[#D8D5CC] space-y-3">
+          {currentProfile && (
+            <button
+              onClick={handleSwitchProfile}
+              className="w-full text-left text-xs text-[#5C5A54] hover:text-[#1A1916] transition-colors px-2 py-2 hover:bg-[#FFFFFF] rounded-sm"
+            >
+              <p className="font-semibold text-[#1A1916]">{currentProfile.athleteName}</p>
+              <p className="text-[#8A8783]">{currentProfile.gradYear} • {currentProfile.sport}</p>
+            </button>
+          )}
+          <div className="flex gap-2 pt-2">
+            <button
+              onClick={handleSwitchProfile}
+              className="flex-1 px-3 py-2 border border-[#D8D5CC] text-[#1A1916] text-xs font-medium rounded-sm hover:bg-[#FFFFFF] transition-colors"
+            >
+              Profiles
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex-1 px-3 py-2 border border-[#D8D5CC] text-[#1A1916] text-xs font-medium rounded-sm hover:bg-[#FFFFFF] transition-colors"
+            >
+              Sign Out
+            </button>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            fullWidth
-            onClick={handleLogout}
-          >
-            Sign Out
-          </Button>
         </div>
       </aside>
 
       {/* Mobile Overlay */}
       {isMobile && sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          className="fixed inset-0 bg-[#1A1916] bg-opacity-40 z-30 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -141,18 +169,27 @@ export default function Layout({ children }: LayoutProps) {
       <main className="flex-1 overflow-auto flex flex-col">
         {/* Top Header (Desktop) */}
         {!isMobile && (
-          <header className="bg-bg-secondary border-b border-border-color px-8 py-6 flex items-center justify-between sticky top-0 z-10">
-            <div>
-              <h2 className="text-sm text-text-secondary font-medium">Welcome back</h2>
-              <p className="text-xl text-text-primary font-playfair font-bold">Sofia Rodriguez</p>
+          <header className="bg-[#FFFFFF] border-b border-[#D8D5CC] px-8 py-4 sticky top-0 z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2 text-sm font-mono text-[#5C5A54]">
+                <span>ROOT</span>
+                <span>/</span>
+                <span className="text-[#1A1916] font-semibold">{getCurrentBreadcrumb()}</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <button className="p-2 hover:bg-[#F4F3EF] rounded-sm transition-colors relative">
+                  <svg className="h-5 w-5 text-[#5C5A54]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  <span className="absolute top-1 right-1 h-2 w-2 bg-[#1A56DB] rounded-full" />
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <button className="p-2 hover:bg-bg-elevated rounded-lg transition-colors relative">
-                <svg className="h-6 w-6 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-                <span className="absolute top-1 right-1 h-2 w-2 bg-gold rounded-full" />
-              </button>
+            <div>
+              <p className="text-xs text-[#5C5A54] tracking-widest">ATHLETE PROFILE</p>
+              <p className="text-lg text-[#1A1916] font-serif font-bold mt-1">
+                {currentProfile ? currentProfile.athleteName : 'Athlete'}
+              </p>
             </div>
           </header>
         )}

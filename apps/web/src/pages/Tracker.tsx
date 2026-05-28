@@ -28,9 +28,9 @@ export default function Tracker() {
         const [expensesRes, contactsRes, summaryRes] = await Promise.all([
           api.expenses.list(),
           api.contacts.list(),
-          api.expenses.getSummary(),
+          api.expenses.getByCategorySum(),
         ]);
-        setExpenses(expensesRes.expenses || []);
+        setExpenses(expensesRes || []);
         setContacts(contactsRes || []);
         setSummary(summaryRes);
       } catch (err) {
@@ -54,9 +54,9 @@ export default function Tracker() {
       // Reload data
       const [expensesRes, summaryRes] = await Promise.all([
         api.expenses.list(),
-        api.expenses.getSummary(),
+        api.expenses.getByCategorySum(),
       ]);
-      setExpenses(expensesRes.expenses || []);
+      setExpenses(expensesRes || []);
       setSummary(summaryRes);
     } catch (err) {
       console.error('Error adding expense:', err);

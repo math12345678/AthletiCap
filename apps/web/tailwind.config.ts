@@ -3,107 +3,73 @@ import type { Config } from 'tailwindcss';
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
+    colors: {
+      // Base Colors
+      white: '#FFFFFF',
+      black: '#000000',
+      transparent: 'transparent',
+
+      // Primary Colors
+      bg: {
+        primary: '#FAFAF8',
+        secondary: '#F4F3EF',
+        elevated: '#FFFFFF',
+      },
+      text: {
+        primary: '#1A1916',
+        secondary: '#5C5A54',
+        muted: '#8A8783',
+      },
+      border: '#D8D5CC',
+
+      // Accent Colors
+      primary: '#1A56DB',      // Electric Blue
+      secondary: '#ECEAE3',    // Warm Beige
+      destructive: '#C0392B',  // Red
+      success: '#2DD09A',       // Green
+      warning: '#F59E0B',       // Orange
+      info: '#5BA5D9',          // Light Blue
+
+      // Chart Colors
+      chart: {
+        '1': '#0E7C50',         // Green
+        '2': '#B45309',         // Orange
+        '3': '#7C3AED',         // Purple
+        '4': '#1A56DB',         // Blue
+        '5': '#C0392B',         // Red
+      },
+    },
+    fontFamily: {
+      sans: ['DM Sans', 'system-ui', 'sans-serif'],
+      serif: ['DM Serif Display', 'serif'],
+      mono: ['DM Mono', 'monospace'],
+    },
+    fontSize: {
+      xs: ['12px', { lineHeight: '16px' }],
+      sm: ['14px', { lineHeight: '20px' }],
+      base: ['16px', { lineHeight: '24px' }],
+      lg: ['18px', { lineHeight: '28px' }],
+      xl: ['20px', { lineHeight: '28px' }],
+      '2xl': ['24px', { lineHeight: '32px' }],
+      '3xl': ['30px', { lineHeight: '36px' }],
+      '4xl': ['36px', { lineHeight: '40px' }],
+    },
+    borderRadius: {
+      none: '0',
+      sm: '1px',
+      DEFAULT: '2px',
+      md: '4px',
+      lg: '6px',
+      xl: '8px',
+    },
+    boxShadow: {
+      none: 'none',
+      sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+      DEFAULT: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+      md: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+    },
     extend: {
-      colors: {
-        // Brand Colors
-        gold: {
-          50: '#FEF9F0',
-          100: '#FDF1DE',
-          200: '#FBE3BD',
-          300: '#F8D59C',
-          400: '#F5BC5A',
-          500: '#F0A500',
-          600: '#D4860F',
-          700: '#A86B0E',
-          800: '#8C570B',
-          900: '#704608',
-          950: '#472A04',
-        },
-        teal: {
-          50: '#F0FEFD',
-          100: '#CCFBF1',
-          200: '#99F6E4',
-          300: '#5EEAD4',
-          400: '#2DD4BF',
-          500: '#0FB8A8',
-          600: '#0D9488',
-          700: '#0D7377',
-          800: '#0F5F5F',
-          900: '#134E4A',
-          950: '#092F2F',
-        },
-        // Semantic Colors
-        success: {
-          50: '#F0FDF4',
-          100: '#DCFCE7',
-          200: '#BBF7D0',
-          300: '#86EFAC',
-          400: '#4ADE80',
-          500: '#22C55E',
-          600: '#16A34A',
-          700: '#15803D',
-          800: '#166534',
-          900: '#145231',
-          950: '#051C15',
-        },
-        error: {
-          50: '#FEF2F2',
-          100: '#FEE2E2',
-          200: '#FECACA',
-          300: '#FCA5A5',
-          400: '#F87171',
-          500: '#EF4444',
-          600: '#DC2626',
-          700: '#B91C1C',
-          800: '#991B1B',
-          900: '#7F1D1D',
-          950: '#500724',
-        },
-        warning: {
-          50: '#FFFBEB',
-          100: '#FEF3C7',
-          200: '#FDE68A',
-          300: '#FCD34D',
-          400: '#FBBF24',
-          500: '#F59E0B',
-          600: '#D97706',
-          700: '#B45309',
-          800: '#92400E',
-          900: '#78350F',
-          950: '#451A03',
-        },
-        info: {
-          50: '#EFF6FF',
-          100: '#DDE9F8',
-          200: '#C2D9F0',
-          300: '#9EC8E8',
-          400: '#7EBCE1',
-          500: '#5BA5D9',
-          600: '#4388CC',
-          700: '#2B6EBE',
-          800: '#2058A8',
-          900: '#1A4788',
-          950: '#102855',
-        },
-        // Legacy colors (keep for compatibility)
-        'bg-primary': '#08090E',
-        'bg-secondary': '#10131C',
-        'bg-elevated': '#1A1F2E',
-        'border-color': '#2A3040',
-        'border-bright': '#3D4A60',
-        'gold-dim': '#8A6000',
-        red: '#E8544A',
-        green: '#2DD09A',
-        yellow: '#F0C040',
-        'text-primary': '#EDF0F7',
-        'text-secondary': '#8A93A8',
-        'text-muted': '#525C6F',
-      },
-      fontFamily: {
-        playfair: ['Playfair Display', 'serif'],
-        syne: ['Syne', 'sans-serif'],
-        mono: ['Fira Code', 'monospace'],
-      },
       animation: {
         slideUp: 'slideUp 300ms cubic-bezier(0, 0, 0.2, 1)',
         slideDown: 'slideDown 300ms cubic-bezier(0, 0, 0.2, 1)',
@@ -148,32 +114,7 @@ export default {
           '75%, 100%': { transform: 'scale(2)', opacity: '0' },
         },
       },
-      transitionTimingFunction: {
-        'ease-out-smooth': 'cubic-bezier(0, 0, 0.2, 1)',
-        'ease-in-smooth': 'cubic-bezier(0.4, 0, 1, 1)',
-        'ease-in-out-smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
-        spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-      },
-      boxShadow: {
-        focus: '0 0 0 3px rgba(240, 165, 0, 0.1), 0 0 0 2px rgba(240, 165, 0, 1)',
-        'focus-teal': '0 0 0 3px rgba(15, 184, 168, 0.1), 0 0 0 2px rgba(15, 184, 168, 1)',
-        glow: '0 0 20px rgba(240, 165, 0, 0.3)',
-        'glow-teal': '0 0 20px rgba(15, 184, 168, 0.3)',
-      },
-      backdropBlur: {
-        xs: '2px',
-        sm: '4px',
-        DEFAULT: '8px',
-        md: '12px',
-        lg: '16px',
-        xl: '24px',
-      },
-      spacing: {
-        'safe': 'max(1rem, env(safe-area-inset-bottom))',
-      },
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-  ],
+  plugins: [],
 } satisfies Config;
