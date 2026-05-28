@@ -30,8 +30,9 @@ export default function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const { currentProfile } = useProfile();
+  const { currentProfile, clearProfile } = useProfile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const isActive = (path: string) => {
     if (path.includes('?')) {
@@ -47,10 +48,12 @@ export default function Layout({ children }: LayoutProps) {
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
-    navigate('/login');
+    clearProfile();
+    navigate('/profile');
   };
 
   const handleSwitchProfile = () => {
+    clearProfile();
     navigate('/profile');
   };
 
@@ -176,13 +179,39 @@ export default function Layout({ children }: LayoutProps) {
                 <span>/</span>
                 <span className="text-[#1A1916] font-semibold">{getCurrentBreadcrumb()}</span>
               </div>
-              <div className="flex items-center gap-4">
-                <button className="p-2 hover:bg-[#F4F3EF] rounded-sm transition-colors relative">
+              <div className="flex items-center gap-4 relative">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="p-2 hover:bg-[#F4F3EF] rounded-sm transition-colors relative"
+                  title="Notifications"
+                >
                   <svg className="h-5 w-5 text-[#5C5A54]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
                   <span className="absolute top-1 right-1 h-2 w-2 bg-[#1A56DB] rounded-full" />
                 </button>
+
+                {/* Notifications Dropdown */}
+                {showNotifications && (
+                  <div className="absolute top-full right-0 mt-2 w-80 bg-[#FFFFFF] border border-[#D8D5CC] rounded-sm shadow-lg z-50">
+                    <div className="p-4 border-b border-[#D8D5CC]">
+                      <h3 className="text-sm font-semibold text-[#1A1916]">Notifications</h3>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      <div className="p-4 text-center text-[#8A8783] text-sm">
+                        No new notifications
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Close notifications when clicking outside */}
+                {showNotifications && (
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowNotifications(false)}
+                  />
+                )}
               </div>
             </div>
             <div>

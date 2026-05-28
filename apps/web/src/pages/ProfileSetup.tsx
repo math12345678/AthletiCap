@@ -106,22 +106,28 @@ const ProfileSetup: React.FC = () => {
     );
   }
 
-  // If user already has a profile, redirect to dashboard
-  if (currentProfile) {
-    navigate('/');
-    return null;
-  }
+  const isEditing = !!currentProfile;
 
   return (
     <Layout>
       <div className="max-w-2xl mx-auto py-12">
-        <div className="mb-8">
-          <h1 className="text-4xl font-playfair font-bold text-text-primary mb-2">
-            Welcome to AthletiCap
-          </h1>
-          <p className="text-lg text-text-secondary">
-            Set up your profile to get started with recruitment tracking
-          </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-playfair font-bold text-text-primary mb-2">
+              {isEditing ? 'Switch Profile' : 'Welcome to AthletiCap'}
+            </h1>
+            <p className="text-lg text-text-secondary">
+              {isEditing ? 'Create or select a different athlete profile' : 'Set up your profile to get started with recruitment tracking'}
+            </p>
+          </div>
+          {isEditing && (
+            <button
+              onClick={() => navigate('/')}
+              className="px-4 py-2 border border-[#D8D5CC] text-[#1A1916] text-sm font-medium rounded-sm hover:bg-[#F4F3EF] transition-colors"
+            >
+              Back to Dashboard
+            </button>
+          )}
         </div>
 
         <Card>

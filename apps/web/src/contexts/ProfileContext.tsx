@@ -35,6 +35,7 @@ interface ProfileContextType {
   currentProfile: AthleteProfile | null;
   createProfile: (profile: CreateProfileInput) => Promise<AthleteProfile>;
   updateProfile: (updates: Partial<CreateProfileInput>) => Promise<AthleteProfile>;
+  clearProfile: () => void;
   isLoading: boolean;
   error: string | null;
 }
@@ -100,12 +101,18 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  const clearProfile = () => {
+    setCurrentProfile(null);
+    setError(null);
+  };
+
   return (
     <ProfileContext.Provider
       value={{
         currentProfile,
         createProfile,
         updateProfile,
+        clearProfile,
         isLoading,
         error,
       }}
