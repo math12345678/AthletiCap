@@ -100,6 +100,11 @@ export const api = {
       const queryStr = query.toString();
       return apiRequest('GET', `/api/schools/matches${queryStr ? '?' + queryStr : ''}`);
     },
+    addToWatchlist: (schoolId: number, notes?: string) =>
+      apiRequest('POST', '/api/schools/watchlist', { schoolId, notes }),
+    removeFromWatchlist: (schoolId: number) =>
+      apiRequest('DELETE', `/api/schools/watchlist/${schoolId}`),
+    getWatchlist: () => apiRequest('GET', '/api/schools/watchlist'),
   },
 
   // Milestones

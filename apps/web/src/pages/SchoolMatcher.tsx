@@ -25,6 +25,9 @@ export default function SchoolMatcher() {
   const [filteredSchools, setFilteredSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedSchoolId, setExpandedSchoolId] = useState<string | null>(null);
+  const [watchlist, setWatchlist] = useState<number[]>([]);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
 
   // Filters
   const [selectedDivision, setSelectedDivision] = useState('');
@@ -36,11 +39,48 @@ export default function SchoolMatcher() {
 
   useEffect(() => {
     loadSchools();
+    loadWatchlist();
   }, []);
 
   useEffect(() => {
     applyFilters();
   }, [schools, selectedDivision, selectedState, selectedSetting, sortBy]);
+
+  const loadWatchlist = async () => {
+    try {
+      const data = await api.schools.getWatchlist();
+      setWatchlist(data.map((entry: any) => entry.schoolId) || []);
+    } catch (err) {
+      console.error('Error loading watchlist:', err);
+    }
+  };
+
+  const handleAddToWatchlist = async (school: School) => {
+    try {
+      await api.schools.addToWatchlist(parseInt(school.id));
+      setWatchlist([...watchlist, parseInt(school.id)]);
+      addToast(`${school.name} added to your watchlist`, 'success');
+    } catch (err) {
+      const errorMsg = (err as Error).message;
+      if (errorMsg.includes('409') || errorMsg.includes('already')) {
+        addToast('School already in watchlist', 'info');
+      } else {
+        addToast('Failed to add to watchlist', 'error');
+      }
+    }
+  };
+
+  const handleRemoveFromWatchlist = async (school: School) => {
+    try {
+      await api.schools.removeFromWatchlist(parseInt(school.id));
+      setWatchlist(watchlist.filter(id => id !== parseInt(school.id)));
+      addToast(`${school.name} removed from watchlist`, 'success');
+    } catch (err) {
+      addToast('Failed to remove from watchlist', 'error');
+    }
+  };
+
+  const isInWatchlist = (schoolId: string) => watchlist.includes(parseInt(schoolId));
 
   const loadSchools = async () => {
     try {
@@ -458,11 +498,30 @@ export default function SchoolMatcher() {
 
                     {/* Action Buttons */}
                     <div className="mt-8 flex gap-3 justify-end">
-                      <button className="px-6 py-2 border border-[#D8D5CC] text-[#1A1916] font-medium rounded-sm hover:bg-white transition-colors text-sm">
+                      <button
+                        onClick={() => {
+                          setSelectedSchool(school);
+                          setShowDetailsModal(true);
+                        }}
+                        className="px-6 py-2 border border-[#D8D5CC] text-[#1A1916] font-medium rounded-sm hover:bg-white transition-colors text-sm"
+                      >
                         Learn More
                       </button>
-                      <button className="px-6 py-2 bg-[#1A56DB] text-white font-medium rounded-sm hover:opacity-90 transition-opacity text-sm">
-                        Add to My List
+                      <button
+                        onClick={() => {
+                          if (isInWatchlist(school.id)) {
+                            handleRemoveFromWatchlist(school);
+                          } else {
+                            handleAddToWatchlist(school);
+                          }
+                        }}
+                        className={`px-6 py-2 font-medium rounded-sm transition-opacity text-sm ${
+                          isInWatchlist(school.id)
+                            ? 'bg-[#2DD09A] text-white hover:opacity-80'
+                            : 'bg-[#1A56DB] text-white hover:opacity-90'
+                        }`}
+                      >
+                        {isInWatchlist(school.id) ? '✓ In Watchlist' : 'Add to My List'}
                       </button>
                     </div>
                   </div>
@@ -486,6 +545,116 @@ export default function SchoolMatcher() {
             >
               Reset Filters
             </button>
+          </div>
+        )}
+
+        {/* School Details Modal */}
+        {showDetailsModal && selectedSchool && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-sm max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+              {/* Modal Header */}
+              <div className="sticky top-0 bg-white border-b border-[#D8D5CC] px-6 py-4 flex justify-between items-center">
+                <h2 className="text-2xl font-serif font-bold text-[#1A1916]">
+                  {selectedSchool.name}
+                </h2>
+                <button
+                  onClick={() => setShowDetailsModal(false)}
+                  className="text-[#5C5A54] hover:text-[#1A1916] text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="px-6 py-6 space-y-6">
+                {/* Basic Info */}
+                <div>
+                  <p className="text-sm text-[#8A8783] mb-2">DIVISION • STATE • SETTING</p>
+                  <p className="text-lg text-[#1A1916]">
+                    {selectedSchool.division} • {selectedSchool.state} • {selectedSchool.setting}
+                  </p>
+                </div>
+
+                {/* Key Metrics Grid */}
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="bg-[#F4F3EF] border border-[#D8D5CC] rounded-sm p-4">
+                    <p className="text-xs text-[#8A8783] mb-2">Fit Score</p>
+                    <p className={`text-3xl font-bold ${getFitScoreColor(selectedSchool.fitScore)}`}>
+                      {selectedSchool.fitScore}
+                    </p>
+                  </div>
+                  <div className="bg-[#F4F3EF] border border-[#D8D5CC] rounded-sm p-4">
+                    <p className="text-xs text-[#8A8783] mb-2">Estimated COA</p>
+                    <p className="text-2xl font-bold text-[#1A56DB]">
+                      {formatCurrency(selectedSchool.estimatedCOA)}
+                    </p>
+                  </div>
+                  <div className="bg-[#F4F3EF] border border-[#D8D5CC] rounded-sm p-4">
+                    <p className="text-xs text-[#8A8783] mb-2">GPA Target</p>
+                    <p className="text-2xl font-bold text-[#1A1916]">
+                      {selectedSchool.GPATarget.toFixed(1)}
+                    </p>
+                  </div>
+                  <div className="bg-[#F4F3EF] border border-[#D8D5CC] rounded-sm p-4">
+                    <p className="text-xs text-[#8A8783] mb-2">Acceptance Rate</p>
+                    <p className="text-2xl font-bold text-[#1A1916]">
+                      {(selectedSchool.acceptanceRate * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+
+                {/* Athletic Scholarship */}
+                <div className="bg-[#F4F3EF] border border-[#D8D5CC] rounded-sm p-4">
+                  <p className="text-xs text-[#8A8783] mb-2">Average Athletic Scholarship</p>
+                  <p className="text-3xl font-bold text-[#2DD09A]">
+                    {selectedSchool.athleticScholarshipPct}%
+                  </p>
+                </div>
+
+                {/* Match Info */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-[#F4F3EF] rounded-sm">
+                    <span className="text-[#1A1916] font-medium">Academic Match</span>
+                    <span className={`px-3 py-1 rounded-sm text-xs font-semibold ${getMatchColor(selectedSchool.academicMatch)}`}>
+                      {selectedSchool.academicMatch}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-[#F4F3EF] rounded-sm">
+                    <span className="text-[#1A1916] font-medium">Athletic Match</span>
+                    <span className={`px-3 py-1 rounded-sm text-xs font-semibold ${getMatchColor(selectedSchool.athleticMatch)}`}>
+                      {selectedSchool.athleticMatch}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="bg-[#F4F3EF] border-t border-[#D8D5CC] px-6 py-4 flex gap-3 justify-end">
+                <button
+                  onClick={() => setShowDetailsModal(false)}
+                  className="px-6 py-2 border border-[#D8D5CC] text-[#1A1916] font-medium rounded-sm hover:bg-white transition-colors text-sm"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    if (isInWatchlist(selectedSchool.id)) {
+                      handleRemoveFromWatchlist(selectedSchool);
+                    } else {
+                      handleAddToWatchlist(selectedSchool);
+                    }
+                    setShowDetailsModal(false);
+                  }}
+                  className={`px-6 py-2 font-medium rounded-sm transition-opacity text-sm ${
+                    isInWatchlist(selectedSchool.id)
+                      ? 'bg-[#2DD09A] text-white hover:opacity-80'
+                      : 'bg-[#1A56DB] text-white hover:opacity-90'
+                  }`}
+                >
+                  {isInWatchlist(selectedSchool.id) ? '✓ In Watchlist' : 'Add to My List'}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
