@@ -302,9 +302,9 @@ export default function MilestonesV2() {
         )}
 
         {/* Section 3: Filters & Sort */}
-        <section>
-          <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4 flex gap-4 items-center flex-wrap">
-          <div className="flex items-center gap-2">
+        <section className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4">
+          <div className="flex gap-4 items-center flex-wrap">
+            <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-[#5C5A54]">
               Filter:
             </span>
@@ -337,8 +337,8 @@ export default function MilestonesV2() {
               <option value="dueDate">Due Date</option>
               <option value="priority">Priority</option>
             </select>
+            </div>
           </div>
-        </div>
         </section>
 
         {/* Section 4: Milestones List */}
