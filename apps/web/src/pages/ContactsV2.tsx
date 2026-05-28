@@ -1,9 +1,11 @@
 import React, { useState, useMemo } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Layout from '../components/layout/Layout';
 import { useToast } from '../components/ui';
 import { useProfile } from '../contexts/ProfileContext';
 import { api } from '../lib/api';
+import { STAGE_COLORS, DIVISION_COLORS } from '../lib/chart-colors';
 import clsx from 'clsx';
 
 // Modal Component
@@ -330,6 +332,38 @@ export default function ContactsV2() {
     }
   };
 
+  // Calculate pipeline metrics for chart
+  const calculatePipelineMetrics = (contactList: any[]) => {
+    const stages = ['Initial Contact', 'Reply Received', 'Phone Call', 'Official Visit', 'Offer Extended'];
+
+    return stages.map((stage) => {
+      const stageContacts = contactList.filter((c) => c.stage === stage);
+      const offers = stageContacts.filter((c) => c.verbalOffer).length;
+
+      return {
+        stage,
+        total: stageContacts.length,
+        offers,
+      };
+    });
+  };
+
+  // Calculate contacts by division for chart
+  const calculateDivisionBreakdown = (contactList: any[]) => {
+    const divisions = ['D1 Power 4', 'D1 Mid-Major', 'D2', 'D3', 'NAIA', 'JUCO'];
+
+    return divisions.map((division) => {
+      const divisionContacts = contactList.filter((c) => c.division === division);
+      const offers = divisionContacts.filter((c) => c.verbalOffer).length;
+
+      return {
+        division,
+        total: divisionContacts.length,
+        offers,
+      };
+    });
+  };
+
   const handleEdit = (contact: any) => {
     setForm(contact);
     setEditingContact(contact);
@@ -400,6 +434,76 @@ export default function ContactsV2() {
               </div>
             )}
           </div>
+
+          {/* Pipeline Analytics Charts */}
+          {contacts.length > 0 && (
+            <div className="space-y-6 mb-8">
+              {/* Pipeline Funnel Chart */}
+              <div className="bg-white border border-[#D8D5CC] rounded-sm p-6">
+                <h3 className="text-sm font-semibold text-[#5C5A54] uppercase mb-4">
+                  Pipeline Conversion Funnel
+                </h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart
+                    data={calculatePipelineMetrics(contacts)}
+                    margin={{ top: 20, right: 30, left: 0, bottom: 60 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <XAxis
+                      dataKey="stage"
+                      angle={-45}
+                      textAnchor="end"
+                      height={100}
+                      tick={{ fill: '#5C5A54', fontSize: 12 }}
+                    />
+                    <YAxis
+                      tick={{ fill: '#5C5A54', fontSize: 12 }}
+                      label={{ value: 'Count', angle: -90, position: 'insideLeft' }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #D8D5CC',
+                        borderRadius: '4px',
+                      }}
+                      labelStyle={{ color: '#1A1916' }}
+                    />
+                    <Legend />
+                    <Bar dataKey="total" fill="#3B82F6" name="Total Contacts" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="offers" fill="#F59E0B" name="Verbal Offers" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Division Breakdown Chart */}
+              <div className="bg-white border border-[#D8D5CC] rounded-sm p-6">
+                <h3 className="text-sm font-semibold text-[#5C5A54] uppercase mb-4">
+                  Contacts by Division
+                </h3>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart
+                    data={calculateDivisionBreakdown(contacts)}
+                    margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <XAxis dataKey="division" tick={{ fill: '#5C5A54', fontSize: 12 }} />
+                    <YAxis tick={{ fill: '#5C5A54', fontSize: 12 }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #D8D5CC',
+                        borderRadius: '4px',
+                      }}
+                      labelStyle={{ color: '#1A1916' }}
+                    />
+                    <Legend />
+                    <Bar dataKey="total" fill="#3B82F6" name="Contacts" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="offers" fill="#2DD09A" name="Offers" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
 
           {/* View Toggle */}
           <div className="flex items-center gap-2 mb-6">
