@@ -1276,7 +1276,7 @@ const mockSchools = [
   { id: schoolId++, name: 'Prairie View A&M University', division: 'D2', state: 'TX', setting: 'Rural', coa: 18000, gpaTarget: 2.6, avgAthleticScholarshipPct: 32, acceptanceRate: 0.91 },
   { id: schoolId++, name: 'Texas State University', division: 'D2', state: 'TX', setting: 'Urban', coa: 22000, gpaTarget: 2.9, avgAthleticScholarshipPct: 38, acceptanceRate: 0.84 },
   // Additional D3 schools - NESCAC and regional
-  { id: schoolI ++, name: 'Colgate University', division: 'D3', state: 'NY', setting: 'Rural', coa: 66000, gpaTarget: 3.82, avgAthleticScholarshipPct: 0, acceptanceRate: 0.22 },
+  { id: schoolId++, name: 'Colgate University', division: 'D3', state: 'NY', setting: 'Rural', coa: 66000, gpaTarget: 3.82, avgAthleticScholarshipPct: 0, acceptanceRate: 0.22 },
   { id: schoolId++, name: 'Hamilton College', division: 'D3', state: 'NY', setting: 'Rural', coa: 65000, gpaTarget: 3.81, avgAthleticScholarshipPct: 0, acceptanceRate: 0.24 },
   { id: schoolId++, name: 'Colby College', division: 'D3', state: 'ME', setting: 'Rural', coa: 64000, gpaTarget: 3.83, avgAthleticScholarshipPct: 0, acceptanceRate: 0.14 },
   { id: schoolId++, name: 'Bates College', division: 'D3', state: 'ME', setting: 'Rural', coa: 62000, gpaTarget: 3.8, avgAthleticScholarshipPct: 0, acceptanceRate: 0.25 },
