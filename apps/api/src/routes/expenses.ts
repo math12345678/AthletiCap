@@ -70,11 +70,11 @@ router.get('/summary', async (req: Request, res: Response) => {
       where: { athleteId },
     });
 
-    const totalSpend = expenses.reduce((sum, e) => sum + e.amount, 0);
+    const totalSpend = expenses.reduce((sum: number, e: any) => sum + e.amount, 0);
 
     // Group by category
     const byCategory: Record<string, number> = {};
-    expenses.forEach((e) => {
+    expenses.forEach((e: any) => {
       byCategory[e.category] = (byCategory[e.category] || 0) + e.amount;
     });
 

@@ -24,7 +24,7 @@ export async function calculateBrandReadiness(athleteId: string): Promise<BrandR
   const checklist: ChecklistItem[] = [];
 
   // Follower tier: 30 points max
-  const totalFollowers = profiles.reduce((sum, p) => sum + p.followerCount, 0);
+  const totalFollowers = profiles.reduce((sum: number, p: any) => sum + p.followerCount, 0);
   if (totalFollowers >= 100000) {
     score += 30;
   } else if (totalFollowers >= 10000) {
@@ -47,7 +47,7 @@ export async function calculateBrandReadiness(athleteId: string): Promise<BrandR
   // Engagement rate: 30 points max
   const avgEngagement =
     profiles.length > 0
-      ? profiles.reduce((sum, p) => sum + p.avgEngagementRate, 0) / profiles.length
+      ? profiles.reduce((sum: number, p: any) => sum + p.avgEngagementRate, 0) / profiles.length
       : 0;
 
   if (avgEngagement >= 5.0) {

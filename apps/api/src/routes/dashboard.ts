@@ -27,7 +27,7 @@ router.get('/', async (req: Request, res: Response) => {
       where: { athleteId },
     });
 
-    const totalSpend = expenses.reduce((sum, e) => sum + e.amount, 0);
+    const totalSpend = expenses.reduce((sum: number, e: any) => sum + e.amount, 0);
 
     // Get coach contacts
     const contacts = await prisma.coachContact.findMany({
@@ -39,10 +39,10 @@ router.get('/', async (req: Request, res: Response) => {
       where: { athleteId },
     });
 
-    const writtenOffers = offers.filter((o) => o.confidenceLevel !== 'SPECULATIVE' && o.confidenceLevel !== 'VERBAL');
+    const writtenOffers = offers.filter((o: any) => o.confidenceLevel !== 'SPECULATIVE' && o.confidenceLevel !== 'VERBAL');
     const lowestNetCostOffer =
       writtenOffers.length > 0
-        ? writtenOffers.reduce((min, offer) => {
+        ? writtenOffers.reduce((min: any, offer: any) => {
             const netCost = offer.annualCOA - offer.athleticScholarshipPct * offer.annualCOA;
             const minNetCost = min.annualCOA - min.athleticScholarshipPct * min.annualCOA;
             return netCost < minNetCost ? offer : min;
@@ -73,7 +73,7 @@ router.get('/', async (req: Request, res: Response) => {
 
     // Get streak
     const weekSet = new Set(
-      streakLogs.map((l) => {
+      streakLogs.map((l: any) => {
         const d = new Date(l.date);
         const weekNum = Math.floor((d.getDate() - d.getDay() + 6) / 7);
         return `${weekNum}-${d.getFullYear()}`;

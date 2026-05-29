@@ -207,7 +207,7 @@ router.get('/compare', async (req: Request, res: Response) => {
 
     const { coaInflationRate = 0.04 } = req.query;
 
-    const comparisons = offers.map((offer) => {
+    const comparisons = offers.map((offer: any) => {
       const meritAidAverage = (offer.meritAidRangeLow + offer.meritAidRangeHigh) / 2;
 
       const projections = project4YearCost({

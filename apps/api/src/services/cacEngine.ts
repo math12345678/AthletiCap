@@ -46,14 +46,14 @@ export async function calculateCAC(athleteId: string): Promise<CACResult> {
     include: { expense: true },
   });
 
-  const totalSpend = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalSpend = expenses.reduce((sum: number, e: any) => sum + e.amount, 0);
 
   const contactValues = contacts
-    .filter((c) => QUALIFYING_TYPES.includes(c.contactType))
-    .map((c) => {
+    .filter((c: any) => QUALIFYING_TYPES.includes(c.contactType))
+    .map((c: any) => {
       const linkedSpend = links
-        .filter((l) => l.contactId === c.id)
-        .reduce((sum, l) => sum + l.expense.amount, 0);
+        .filter((l: any) => l.contactId === c.id)
+        .reduce((sum: number, l: any) => sum + l.expense.amount, 0);
 
       return {
         schoolName: c.schoolName,
@@ -67,7 +67,7 @@ export async function calculateCAC(athleteId: string): Promise<CACResult> {
     contacts.length > 0 ? totalSpend / contacts.length : null;
 
   const weightedContactCount = contactValues.reduce(
-    (sum, cv) => sum + cv.weight,
+    (sum: number, cv: any) => sum + cv.weight,
     0
   );
   const weightedCAC = weightedContactCount > 0 ? totalSpend / weightedContactCount : null;
