@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
-import nilStateRules from '../data/nil_state_rules.json' assert { type: 'json' };
+const nilStateRules = require('../data/nil_state_rules.json');
 
 const prisma = new PrismaClient();
 

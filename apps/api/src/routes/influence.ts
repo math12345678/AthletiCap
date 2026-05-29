@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { calculateBrandReadiness } from '../services/brandReadinessEngine';
-import nilStateRules from '../data/nil_state_rules.json' assert { type: 'json' };
+const nilStateRules = require('../data/nil_state_rules.json');
 
 const router = Router();
 const prisma = new PrismaClient();
