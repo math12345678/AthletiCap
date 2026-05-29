@@ -47,7 +47,7 @@ function runMonteCarloSimulation(
 export default function MonteCarloPredictions() {
   const { currentProfile } = useProfile();
 
-  const { data: dashboardData, isLoading } = useQuery({
+  const { data: dashboardData, isLoading } = useQuery<any>({
     queryKey: ['dashboard', 'summary'],
     queryFn: () => api.dashboard.getSummary(),
     enabled: !!currentProfile,

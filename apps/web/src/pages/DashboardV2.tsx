@@ -112,13 +112,13 @@ export default function DashboardV2() {
   const { familyProfile } = useFamilyProfile();
   const [showFamilyProfile, setShowFamilyProfile] = useState(false);
 
-  const { data: dashboardData, isLoading: dashboardLoading } = useQuery({
+  const { data: dashboardData, isLoading: dashboardLoading } = useQuery<any>({
     queryKey: ['dashboard', 'summary'],
     queryFn: () => api.dashboard.getSummary(),
     enabled: !!currentProfile,
   });
 
-  const { data: predictions, isLoading: predictionsLoading } = useQuery({
+  const { data: predictions, isLoading: predictionsLoading } = useQuery<any>({
     queryKey: ['dashboard', 'prediction'],
     queryFn: () => api.dashboard.getPrediction(),
     enabled: !!currentProfile,

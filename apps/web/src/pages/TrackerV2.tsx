@@ -285,25 +285,25 @@ export default function TrackerV2() {
   });
 
   // Queries
-  const { data: expenses = [], isLoading: expensesLoading } = useQuery({
+  const { data: expenses = [], isLoading: expensesLoading } = useQuery<any>({
     queryKey: ['expenses'],
     queryFn: () => api.expenses.list(),
     enabled: !!currentProfile,
   });
 
-  const { data: contacts = [], isLoading: contactsLoading } = useQuery({
+  const { data: contacts = [], isLoading: contactsLoading } = useQuery<any>({
     queryKey: ['contacts'],
     queryFn: () => api.contacts.list(),
     enabled: !!currentProfile,
   });
 
-  const { data: expenseSummary = [] } = useQuery({
+  const { data: expenseSummary = [] } = useQuery<any>({
     queryKey: ['expenses', 'summary'],
     queryFn: () => api.expenses.getByCategorySum(),
     enabled: !!currentProfile,
   });
 
-  const { data: contactPipeline = [] } = useQuery({
+  const { data: contactPipeline = [] } = useQuery<any>({
     queryKey: ['contacts', 'pipeline'],
     queryFn: () => api.contacts.getPipelineSummary(),
     enabled: !!currentProfile,

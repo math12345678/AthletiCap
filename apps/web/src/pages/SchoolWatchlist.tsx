@@ -369,7 +369,7 @@ const SchoolComparison: React.FC<{ schools: School[] }> = ({ schools }) => {
 export default function SchoolWatchlist() {
   const { currentProfile } = useProfile();
 
-  const { data: watchlistEntries = [], isLoading, error } = useQuery({
+  const { data: watchlistEntries = [], isLoading, error } = useQuery<any>({
     queryKey: ['schools', 'watchlist'],
     queryFn: () => api.schools.getWatchlist(),
     enabled: !!currentProfile,

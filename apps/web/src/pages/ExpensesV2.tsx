@@ -203,17 +203,17 @@ export default function ExpensesV2() {
   });
 
   // Queries
-  const { data: expenses = [], isLoading } = useQuery({
+  const { data: expenses = [] } = useQuery<any>({
     queryKey: ['expenses'],
     queryFn: () => api.expenses.list(),
     enabled: !!currentProfile,
-  });
+  }) as any;
 
-  const { data: expenseSummary = [] } = useQuery({
+  const { data: expenseSummary = [] } = useQuery<any>({
     queryKey: ['expenses', 'summary'],
     queryFn: () => api.expenses.getByCategorySum(),
     enabled: !!currentProfile,
-  });
+  }) as any;
 
   // Mutations
   const createMutation = useMutation({

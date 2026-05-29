@@ -247,13 +247,13 @@ export default function ContactsV2() {
   });
 
   // Queries
-  const { data: contacts = [], isLoading } = useQuery({
+  const { data: contacts = [], isLoading } = useQuery<any>({
     queryKey: ['contacts'],
     queryFn: () => api.contacts.list(),
     enabled: !!currentProfile,
   });
 
-  const { data: pipeline = [] } = useQuery({
+  const { data: pipeline = [] } = useQuery<any>({
     queryKey: ['contacts', 'pipeline'],
     queryFn: () => api.contacts.getPipelineSummary(),
     enabled: !!currentProfile,
