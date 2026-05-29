@@ -4,18 +4,25 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastProvider } from './components/ui';
 import { api, setAuthToken } from './lib/api';
 import { ProfileProvider, useProfile } from './contexts/ProfileContext';
+import { FamilyProfileProvider } from './contexts/FamilyProfileContext';
 
 import Onboarding from './pages/Onboarding';
 import DashboardV2 from './pages/DashboardV2';
 import ExpensesV2 from './pages/ExpensesV2';
 import ContactsV2 from './pages/ContactsV2';
 import OffersV2 from './pages/OffersV2';
+import FinancialReadinessDashboard from './pages/FinancialReadinessDashboard';
 import SchoolMatcher from './pages/SchoolMatcher';
+import SchoolWatchlist from './pages/SchoolWatchlist';
 import BudgetAdvisor from './pages/BudgetAdvisor';
 import MilestonesV2 from './pages/MilestonesV2';
 import Settings from './pages/Settings';
 import ProfileSetup from './pages/ProfileSetup';
 import Login from './pages/Login';
+import About from './pages/About';
+import Legal from './pages/Legal';
+import MonteCarloPredictions from './pages/MonteCarloPredictions';
+import PersonalFinanceGuide from './pages/PersonalFinanceGuide';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -61,10 +68,16 @@ function AppRoutes() {
           <Route path="/tracker" element={<ExpensesV2 />} />
           <Route path="/contacts" element={<ContactsV2 />} />
           <Route path="/offers" element={<OffersV2 />} />
+          <Route path="/financial-readiness" element={<FinancialReadinessDashboard />} />
           <Route path="/milestones" element={<MilestonesV2 />} />
           <Route path="/school-matcher" element={<SchoolMatcher />} />
+          <Route path="/school-watchlist" element={<SchoolWatchlist />} />
           <Route path="/budget-advisor" element={<BudgetAdvisor />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/legal" element={<Legal />} />
+          <Route path="/monte-carlo" element={<MonteCarloPredictions />} />
+          <Route path="/finance-guide" element={<PersonalFinanceGuide />} />
           <Route path="*" element={<Navigate to="/" />} />
         </>
       )}
@@ -114,7 +127,9 @@ export default function App() {
       <ToastProvider>
         <BrowserRouter>
           <ProfileProvider>
-            <AppRoutes />
+            <FamilyProfileProvider>
+              <AppRoutes />
+            </FamilyProfileProvider>
           </ProfileProvider>
         </BrowserRouter>
       </ToastProvider>

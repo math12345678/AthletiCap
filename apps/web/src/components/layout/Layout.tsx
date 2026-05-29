@@ -14,9 +14,13 @@ const navItems = [
   { label: 'Recruitment CapEx', path: '/tracker', icon: '📝', category: 'main', breadcrumb: 'EXPENSES' },
   { label: 'Coach Intelligence', path: '/contacts', icon: '👥', category: 'main', breadcrumb: 'CONTACTS' },
   { label: 'School Offers', path: '/offers', icon: '💰', category: 'planning', breadcrumb: 'OFFERS' },
+  { label: 'Financial Readiness', path: '/financial-readiness', icon: '💎', category: 'planning', breadcrumb: 'FINANCIAL READINESS' },
   { label: 'School Matcher', path: '/school-matcher', icon: '🎓', category: 'planning', breadcrumb: 'MATCHER' },
+  { label: 'School Watchlist', path: '/school-watchlist', icon: '⭐', category: 'planning', breadcrumb: 'WATCHLIST' },
   { label: 'Budget Advisor', path: '/budget-advisor', icon: '💡', category: 'planning', breadcrumb: 'BUDGET' },
+  { label: 'Monte Carlo', path: '/monte-carlo', icon: '🔮', category: 'planning', breadcrumb: 'PREDICTIONS' },
   { label: 'Milestones', path: '/milestones', icon: '🎯', category: 'planning', breadcrumb: 'MILESTONES' },
+  { label: 'Finance Guide', path: '/finance-guide', icon: '📚', category: 'planning', breadcrumb: 'GUIDE' },
   { label: 'Settings', path: '/settings', icon: '⚙️', category: 'account', breadcrumb: 'SETTINGS' },
 ];
 

@@ -3,9 +3,10 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { api } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import Layout from '../components/layout/Layout';
-import { useToast } from '../components/ui';
+import { useToast, GlossaryTerm } from '../components/ui';
 import { FitScoreDistributionChart, calculateFitScoreDistribution } from '../components/charts/FitScoreChart';
 import { DIVISION_COLORS } from '../lib/chart-colors';
+import SchoolDetailModal from '../components/SchoolDetailModal';
 import clsx from 'clsx';
 
 interface School {
@@ -116,16 +117,28 @@ export default function SchoolMatcher() {
     }
 
     // Sort
-    if (sortBy === 'fitScore') {
-      filtered.sort((a, b) => b.fitScore - a.fitScore);
-    } else if (sortBy === 'cost') {
-      filtered.sort((a, b) => a.estimatedCOA - b.estimatedCOA);
-    } else if (sortBy === 'academic') {
-      filtered.sort((a, b) => {
-        const aOrder = ['Safety', 'Fit', 'Reach'].indexOf(a.academicMatch);
-        const bOrder = ['Safety', 'Fit', 'Reach'].indexOf(b.academicMatch);
-        return aOrder - bOrder;
-      });
+    switch (sortBy) {
+      case 'fitScore':
+        filtered.sort((a, b) => b.fitScore - a.fitScore);
+        break;
+      case 'cost':
+        filtered.sort((a, b) => a.estimatedCOA - b.estimatedCOA);
+        break;
+      case 'scholarship':
+        filtered.sort((a, b) => b.athleticScholarshipPct - a.athleticScholarshipPct);
+        break;
+      case 'academic':
+        filtered.sort((a, b) => {
+          const aOrder = ['Safety', 'Fit', 'Reach'].indexOf(a.academicMatch);
+          const bOrder = ['Safety', 'Fit', 'Reach'].indexOf(b.academicMatch);
+          return aOrder - bOrder;
+        });
+        break;
+      case 'acceptance':
+        filtered.sort((a, b) => a.acceptanceRate - b.acceptanceRate);
+        break;
+      default:
+        filtered.sort((a, b) => b.fitScore - a.fitScore);
     }
 
     setFilteredSchools(filtered);
@@ -225,7 +238,7 @@ export default function SchoolMatcher() {
     <Layout>
       <div className="space-y-8">
         {/* Header */}
-        <div>
+        <div className="animate-slideUp">
           <h1 className="text-5xl font-serif font-bold text-[#1A1916] mb-2">
             School Matcher
           </h1>
@@ -236,7 +249,7 @@ export default function SchoolMatcher() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white border border-[#D8D5CC] rounded-sm p-6">
+        <div className="bg-white border border-[#D8D5CC] rounded-sm p-6 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200">
           <h3 className="text-sm font-semibold text-[#5C5A54] uppercase mb-4">
             Filter & Sort
           </h3>
@@ -301,8 +314,10 @@ export default function SchoolMatcher() {
                 onChange={(e) => setSortBy(e.target.value)}
                 className="w-full px-3 py-2 border border-[#D8D5CC] rounded-sm focus:border-[#1A56DB] focus:ring-2 focus:ring-[#1A56DB] focus:ring-opacity-10 outline-none text-sm"
               >
-                <option value="fitScore">Fit Score</option>
+                <option value="fitScore">Fit Score (High to Low)</option>
                 <option value="cost">Cost (Low to High)</option>
+                <option value="scholarship">Scholarship % (High to Low)</option>
+                <option value="acceptance">Acceptance Rate (Low to High)</option>
                 <option value="academic">Academic Match</option>
               </select>
             </div>
@@ -332,7 +347,7 @@ export default function SchoolMatcher() {
         {filteredSchools.length > 0 && (
           <div className="space-y-6">
             {/* Fit Score Distribution */}
-            <div className="bg-white border border-[#D8D5CC] rounded-sm p-6">
+            <div className="bg-white border border-[#D8D5CC] rounded-sm p-6 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200">
               <FitScoreDistributionChart
                 data={calculateFitScoreDistribution(filteredSchools)}
                 height={300}
@@ -341,7 +356,7 @@ export default function SchoolMatcher() {
             </div>
 
             {/* Schools by Division */}
-            <div className="bg-white border border-[#D8D5CC] rounded-sm p-6">
+            <div className="bg-white border border-[#D8D5CC] rounded-sm p-6 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200">
               <h3 className="text-sm font-semibold text-[#5C5A54] uppercase mb-4">
                 Schools by Division
               </h3>
@@ -391,14 +406,15 @@ export default function SchoolMatcher() {
         {/* Schools Grid */}
         {filteredSchools.length > 0 ? (
           <div className="space-y-4">
-            {filteredSchools.map((school) => (
+            {filteredSchools.map((school, idx) => (
               <div
                 key={school.id}
-                className="bg-white border border-[#D8D5CC] rounded-sm overflow-hidden"
+                className="bg-white border border-[#D8D5CC] rounded-sm overflow-hidden animate-slideUp shadow-sm hover:shadow-md transition-all duration-200"
+                style={{ animationDelay: `${idx * 50}ms` }}
               >
                 {/* School Card Header */}
                 <div
-                  className="p-6 cursor-pointer hover:bg-[#F4F3EF] transition-colors"
+                  className="p-6 cursor-pointer hover:bg-[#F4F3EF] transition-colors duration-200"
                   onClick={() =>
                     setExpandedSchoolId(
                       expandedSchoolId === school.id ? null : school.id
@@ -420,7 +436,7 @@ export default function SchoolMatcher() {
                     </div>
                     <div className="text-right">
                       <div className="text-xs text-[#8A8783] mb-1">
-                        Fit Score
+                        <GlossaryTerm term="School Fit Score">Fit Score</GlossaryTerm>
                       </div>
                       <div
                         className={`text-4xl font-serif font-bold ${getFitScoreColor(school.fitScore)}`}
@@ -642,114 +658,13 @@ export default function SchoolMatcher() {
         )}
 
         {/* School Details Modal */}
-        {showDetailsModal && selectedSchool && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-sm max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-white border-b border-[#D8D5CC] px-6 py-4 flex justify-between items-center">
-                <h2 className="text-2xl font-serif font-bold text-[#1A1916]">
-                  {selectedSchool.name}
-                </h2>
-                <button
-                  onClick={() => setShowDetailsModal(false)}
-                  className="text-[#5C5A54] hover:text-[#1A1916] text-2xl"
-                >
-                  ×
-                </button>
-              </div>
-
-              {/* Modal Body */}
-              <div className="px-6 py-6 space-y-6">
-                {/* Basic Info */}
-                <div>
-                  <p className="text-sm text-[#8A8783] mb-2">DIVISION • STATE • SETTING</p>
-                  <p className="text-lg text-[#1A1916]">
-                    {selectedSchool.division} • {selectedSchool.state} • {selectedSchool.setting}
-                  </p>
-                </div>
-
-                {/* Key Metrics Grid */}
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="bg-[#F4F3EF] border border-[#D8D5CC] rounded-sm p-4">
-                    <p className="text-xs text-[#8A8783] mb-2">Fit Score</p>
-                    <p className={`text-3xl font-bold ${getFitScoreColor(selectedSchool.fitScore)}`}>
-                      {selectedSchool.fitScore}
-                    </p>
-                  </div>
-                  <div className="bg-[#F4F3EF] border border-[#D8D5CC] rounded-sm p-4">
-                    <p className="text-xs text-[#8A8783] mb-2">Estimated COA</p>
-                    <p className="text-2xl font-bold text-[#1A56DB]">
-                      {formatCurrency(selectedSchool.estimatedCOA)}
-                    </p>
-                  </div>
-                  <div className="bg-[#F4F3EF] border border-[#D8D5CC] rounded-sm p-4">
-                    <p className="text-xs text-[#8A8783] mb-2">GPA Target</p>
-                    <p className="text-2xl font-bold text-[#1A1916]">
-                      {selectedSchool.GPATarget.toFixed(1)}
-                    </p>
-                  </div>
-                  <div className="bg-[#F4F3EF] border border-[#D8D5CC] rounded-sm p-4">
-                    <p className="text-xs text-[#8A8783] mb-2">Acceptance Rate</p>
-                    <p className="text-2xl font-bold text-[#1A1916]">
-                      {(selectedSchool.acceptanceRate * 100).toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
-
-                {/* Athletic Scholarship */}
-                <div className="bg-[#F4F3EF] border border-[#D8D5CC] rounded-sm p-4">
-                  <p className="text-xs text-[#8A8783] mb-2">Average Athletic Scholarship</p>
-                  <p className="text-3xl font-bold text-[#2DD09A]">
-                    {selectedSchool.athleticScholarshipPct}%
-                  </p>
-                </div>
-
-                {/* Match Info */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-[#F4F3EF] rounded-sm">
-                    <span className="text-[#1A1916] font-medium">Academic Match</span>
-                    <span className={`px-3 py-1 rounded-sm text-xs font-semibold ${getMatchColor(selectedSchool.academicMatch)}`}>
-                      {selectedSchool.academicMatch}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-[#F4F3EF] rounded-sm">
-                    <span className="text-[#1A1916] font-medium">Athletic Match</span>
-                    <span className={`px-3 py-1 rounded-sm text-xs font-semibold ${getMatchColor(selectedSchool.athleticMatch)}`}>
-                      {selectedSchool.athleticMatch}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="bg-[#F4F3EF] border-t border-[#D8D5CC] px-6 py-4 flex gap-3 justify-end">
-                <button
-                  onClick={() => setShowDetailsModal(false)}
-                  className="px-6 py-2 border border-[#D8D5CC] text-[#1A1916] font-medium rounded-sm hover:bg-white transition-colors text-sm"
-                >
-                  Close
-                </button>
-                <button
-                  onClick={() => {
-                    if (isInWatchlist(selectedSchool.id)) {
-                      handleRemoveFromWatchlist(selectedSchool);
-                    } else {
-                      handleAddToWatchlist(selectedSchool);
-                    }
-                    setShowDetailsModal(false);
-                  }}
-                  className={`px-6 py-2 font-medium rounded-sm transition-opacity text-sm ${
-                    isInWatchlist(selectedSchool.id)
-                      ? 'bg-[#2DD09A] text-white hover:opacity-80'
-                      : 'bg-[#1A56DB] text-white hover:opacity-90'
-                  }`}
-                >
-                  {isInWatchlist(selectedSchool.id) ? '✓ In Watchlist' : 'Add to My List'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <SchoolDetailModal
+          school={selectedSchool}
+          isOpen={showDetailsModal}
+          onClose={() => setShowDetailsModal(false)}
+          onAddToWatchlist={handleAddToWatchlist}
+          isInWatchlist={selectedSchool ? isInWatchlist(selectedSchool.id) : false}
+        />
       </div>
     </Layout>
   );

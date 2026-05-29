@@ -4,8 +4,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useProfile, CreateProfileInput } from '../contexts/ProfileContext';
+import { useFamilyProfile } from '../contexts/FamilyProfileContext';
 import Layout from '../components/layout/Layout';
 import { Card, CardHeader, CardBody, CardFooter, Button, Loader } from '../components/ui';
+import { api } from '../lib/api';
 
 const profileSchema = z.object({
   athleteName: z.string().min(1, 'Name is required'),
@@ -13,12 +15,18 @@ const profileSchema = z.object({
   sport: z.string().min(1, 'Sport is required'),
   gradYear: z.number().min(2024, 'Graduation year must be 2024 or later').max(2035, 'Invalid graduation year'),
   state: z.string().min(2, 'State is required').max(2, 'State must be 2 characters'),
-  budgetGoal: z.number().optional(),
-  gpa: z.number().optional(),
-  sat: z.number().optional(),
-  act: z.number().optional(),
+  budgetGoal: z.number().nullable().optional(),
+  gpa: z.number().nullable().optional(),
+  sat: z.number().nullable().optional(),
+  act: z.number().nullable().optional(),
   testOptional: z.boolean().optional(),
-});
+}).refine(
+  (data) => {
+    // If gpa or sat/act are provided, at least one test score should be there
+    return true; // Allow submission even with incomplete academic data
+  },
+  { message: 'Please provide complete academic information or leave all blank' }
+);
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
@@ -49,10 +57,12 @@ const US_STATES = [
 const ProfileSetup: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentProfile, createProfile, updateProfile, clearProfile, isLoading: contextLoading, error: contextError } = useProfile();
+  const { currentProfile, createProfile, updateProfile, clearProfile, reloadProfile, isLoading: contextLoading, error: contextError } = useProfile();
+  const { updateFamilyProfile } = useFamilyProfile();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showSwitchMode, setShowSwitchMode] = useState(false);
+  const [isLoadingDemo, setIsLoadingDemo] = useState(false);
 
   // When navigating to /profile from the app, it's for profile switching
   useEffect(() => {
@@ -90,6 +100,33 @@ const ProfileSetup: React.FC = () => {
   });
 
   const showAdvancedFields = watch('role') === 'athlete';
+
+  const handleLoadDemo = async () => {
+    try {
+      setIsLoadingDemo(true);
+      setSubmitError(null);
+
+      // Call the load demo endpoint
+      const response = await api.profile.loadDemo();
+
+      // If family profile is returned, save it
+      if (response && response.familyProfile) {
+        updateFamilyProfile(response.familyProfile);
+      }
+
+      // Reload profile context to get the newly created demo profile
+      await reloadProfile();
+
+      // Demo profile loaded successfully, navigate to dashboard
+      navigate('/');
+    } catch (err) {
+      const errorMsg = (err as Error).message;
+      setSubmitError(errorMsg || 'Failed to load demo profile. Please try again.');
+      console.error('Demo profile load error:', err);
+    } finally {
+      setIsLoadingDemo(false);
+    }
+  };
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
@@ -272,7 +309,10 @@ const ProfileSetup: React.FC = () => {
                     step="100"
                     min="0"
                     placeholder="10000"
-                    {...register('budgetGoal', { valueAsNumber: true })}
+                    {...register('budgetGoal', {
+                      valueAsNumber: true,
+                      setValueAs: (val) => val === '' || isNaN(val) ? undefined : val
+                    })}
                     className="w-full pl-8 pr-4 py-2 border border-border-color rounded-lg bg-bg-primary text-text-primary placeholder-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-gold-500"
                   />
                 </div>
@@ -297,7 +337,10 @@ const ProfileSetup: React.FC = () => {
                           min="0"
                           max="4"
                           placeholder="3.8"
-                          {...register('gpa', { valueAsNumber: true })}
+                          {...register('gpa', {
+                            valueAsNumber: true,
+                            setValueAs: (val) => val === '' || isNaN(val) ? undefined : val
+                          })}
                           className="w-full px-4 py-2 border border-border-color rounded-lg bg-bg-primary text-text-primary placeholder-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-gold-500"
                         />
                       </div>
@@ -313,7 +356,10 @@ const ProfileSetup: React.FC = () => {
                           min="400"
                           max="1600"
                           placeholder="1400"
-                          {...register('sat', { valueAsNumber: true })}
+                          {...register('sat', {
+                            valueAsNumber: true,
+                            setValueAs: (val) => val === '' || isNaN(val) ? undefined : val
+                          })}
                           className="w-full px-4 py-2 border border-border-color rounded-lg bg-bg-primary text-text-primary placeholder-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-gold-500"
                         />
                       </div>
@@ -329,7 +375,10 @@ const ProfileSetup: React.FC = () => {
                           min="1"
                           max="36"
                           placeholder="32"
-                          {...register('act', { valueAsNumber: true })}
+                          {...register('act', {
+                            valueAsNumber: true,
+                            setValueAs: (val) => val === '' || isNaN(val) ? undefined : val
+                          })}
                           className="w-full px-4 py-2 border border-border-color rounded-lg bg-bg-primary text-text-primary placeholder-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-gold-500"
                         />
                       </div>
@@ -353,18 +402,36 @@ const ProfileSetup: React.FC = () => {
               )}
             </CardBody>
 
-            <CardFooter className="flex gap-3">
-              <Button variant="ghost" onClick={() => navigate('/')} disabled={isSubmitting}>
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                loading={isSubmitting}
-                loadingText="Creating profile..."
-                disabled={isSubmitting}
-              >
-                Create Profile
-              </Button>
+            <CardFooter className="flex flex-col gap-4">
+              <div className="flex gap-3">
+                <Button variant="ghost" onClick={() => navigate('/')} disabled={isSubmitting || isLoadingDemo}>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  loading={isSubmitting}
+                  loadingText="Creating profile..."
+                  disabled={isSubmitting || isLoadingDemo}
+                >
+                  Create Profile
+                </Button>
+              </div>
+
+              {!showSwitchMode && (
+                <div className="pt-4 border-t border-[#D8D5CC]">
+                  <p className="text-sm text-[#8A8783] mb-3">Want to see it in action?</p>
+                  <Button
+                    variant="outline"
+                    onClick={handleLoadDemo}
+                    loading={isLoadingDemo}
+                    loadingText="Loading demo profile..."
+                    disabled={isLoadingDemo || isSubmitting}
+                    className="w-full"
+                  >
+                    Load Demo Profile
+                  </Button>
+                </div>
+              )}
             </CardFooter>
           </form>
         </Card>

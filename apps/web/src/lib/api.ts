@@ -45,6 +45,7 @@ export const api = {
     get: () => apiRequest('GET', '/api/profile'),
     create: (data: any) => apiRequest('POST', '/api/profile', data),
     update: (data: any) => apiRequest('PATCH', '/api/profile', data),
+    loadDemo: () => apiRequest('POST', '/api/profile/load-demo'),
   },
 
   // Expenses

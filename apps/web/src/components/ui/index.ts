@@ -7,3 +7,4 @@ export { Select } from './Select';
 export { Modal } from './Modal';
 export { ToastProvider, useToast, ToastContainer } from './Toast';
 export type { Toast, ToastType } from './Toast';
+export { GlossaryTerm } from './GlossaryTerm';

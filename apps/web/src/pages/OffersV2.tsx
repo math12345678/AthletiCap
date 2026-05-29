@@ -3,7 +3,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { api } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import Layout from '../components/layout/Layout';
-import { useToast } from '../components/ui';
+import { useToast, GlossaryTerm } from '../components/ui';
+import FinancialAnalysis from '../components/FinancialAnalysis';
+import CostComparisonChart from '../components/charts/CostComparisonChart';
 
 interface Offer {
   id: string;
@@ -141,9 +143,12 @@ export default function OffersV2() {
 
   const calculateYear1NetCost = (offer: Offer): number => {
     const athleticScholar = offer.COA * (offer.athleticScholarshipPct / 100);
-    const meritAid =
-      offer.meritAidOverride ||
-      (offer.meritAidEstimate.low + offer.meritAidEstimate.high) / 2;
+    let meritAid = offer.meritAidOverride || 0;
+
+    if (!meritAid && offer.meritAidEstimate) {
+      meritAid = (offer.meritAidEstimate.low + offer.meritAidEstimate.high) / 2;
+    }
+
     return Math.max(
       0,
       offer.COA - athleticScholar - meritAid + offer.annualContribution
@@ -156,9 +161,12 @@ export default function OffersV2() {
 
     for (let i = 0; i < 4; i++) {
       const athleticScholar = currentCOA * (offer.athleticScholarshipPct / 100);
-      const meritAid =
-        offer.meritAidOverride ||
-        (offer.meritAidEstimate.low + offer.meritAidEstimate.high) / 2;
+      let meritAid = offer.meritAidOverride || 0;
+
+      if (!meritAid && offer.meritAidEstimate) {
+        meritAid = (offer.meritAidEstimate.low + offer.meritAidEstimate.high) / 2;
+      }
+
       const netCost = Math.max(
         0,
         currentCOA - athleticScholar - meritAid + offer.annualContribution
@@ -194,9 +202,12 @@ export default function OffersV2() {
         }
 
         const athleticScholar = currentCOA * (offer.athleticScholarshipPct / 100);
-        const meritAid =
-          offer.meritAidOverride ||
-          (offer.meritAidEstimate.low + offer.meritAidEstimate.high) / 2;
+        let meritAid = offer.meritAidOverride || 0;
+
+        if (!meritAid && offer.meritAidEstimate) {
+          meritAid = (offer.meritAidEstimate.low + offer.meritAidEstimate.high) / 2;
+        }
+
         const netCost = Math.max(
           0,
           currentCOA - athleticScholar - meritAid + offer.annualContribution
@@ -270,7 +281,7 @@ export default function OffersV2() {
     <Layout>
       <div className="space-y-8">
         {/* Section 1: School Offers Analysis */}
-        <div className="flex justify-between items-start mb-8">
+        <div className="flex justify-between items-start mb-8 animate-slideUp">
           <h2 className="section-header">
             <span className="section-number"># [1]</span> SCHOOL OFFERS ANALYSIS
           </h2>
@@ -279,7 +290,7 @@ export default function OffersV2() {
               setSelectedOffer(null);
               setShowAddModal(true);
             }}
-            className="px-4 py-2 bg-[#1A56DB] text-white rounded-DEFAULT text-sm font-semibold hover:opacity-90 transition-opacity"
+            className="px-4 py-2 bg-[#1A56DB] text-white rounded-DEFAULT text-sm font-semibold hover:bg-[#1540A8] transition-colors duration-200"
           >
             + Add Offer
           </button>
@@ -287,7 +298,7 @@ export default function OffersV2() {
 
         {/* Best Offer Highlight */}
         {bestOffer && (
-          <div className="bg-white border-2 border-[#1A56DB] rounded-DEFAULT p-6 mb-8">
+          <div className="bg-white border-2 border-[#1A56DB] rounded-DEFAULT p-6 mb-8 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200">
             <div className="text-xs font-mono uppercase tracking-widest text-[#1A56DB] mb-3">
               Best Offer
             </div>
@@ -306,14 +317,14 @@ export default function OffersV2() {
               </div>
               <div>
                 <div className="text-[#5C5A54] text-xs mb-1">
-                  Athletic Scholarship
+                  <GlossaryTerm term="Athletic Scholarship %">Athletic Scholarship</GlossaryTerm>
                 </div>
                 <div className="text-lg font-semibold text-[#2DD09A]">
                   {bestOffer.athleticScholarshipPct}%
                 </div>
               </div>
               <div>
-                <div className="text-[#5C5A54] text-xs mb-1">Net Year-1 Cost</div>
+                <div className="text-[#5C5A54] text-xs mb-1"><GlossaryTerm term="Net Cost">Net Year-1 Cost</GlossaryTerm></div>
                 <div className="text-2xl font-serif font-bold text-[#1A56DB]">
                   {formatCurrency(calculateYear1NetCost(bestOffer))}
                 </div>
@@ -324,7 +335,7 @@ export default function OffersV2() {
 
         {/* 4-Year Cost Projection Chart */}
         {offers.length > 1 && (
-          <div className="bg-white border border-[#D8D5CC] rounded-sm p-6">
+          <div className="bg-white border border-[#D8D5CC] rounded-sm p-6 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200">
             <h3 className="text-sm font-semibold text-[#5C5A54] uppercase mb-4">
               4-Year Cost Projection Comparison
             </h3>
@@ -383,17 +394,34 @@ export default function OffersV2() {
           </div>
         )}
 
+        {/* Cost Comparison Chart */}
+        {offers.length > 0 && (
+          <CostComparisonChart
+            offers={offers.map((o) => ({
+              schoolName: o.schoolName,
+              coa: o.COA,
+              athleticScholarshipPct: o.athleticScholarshipPct,
+              meritAid:
+                o.meritAidOverride ||
+                (o.meritAidEstimate ? (o.meritAidEstimate.low + o.meritAidEstimate.high) / 2 : 0),
+              annualContribution: o.annualContribution,
+            }))}
+            height={300}
+          />
+        )}
+
         {/* Offers Grid */}
         {offers.length > 0 ? (
           <div className="space-y-4">
-            {offers.map((offer) => (
+            {offers.map((offer, idx) => (
               <div
                 key={offer.id}
-                className="bg-white border border-[#D8D5CC] rounded-sm overflow-hidden"
+                className="bg-white border border-[#D8D5CC] rounded-sm overflow-hidden animate-slideUp shadow-sm hover:shadow-md transition-all duration-200"
+                style={{ animationDelay: `${idx * 50}ms` }}
               >
                 {/* Offer Summary Card */}
                 <div
-                  className="p-6 cursor-pointer hover:bg-[#F4F3EF] transition-colors"
+                  className="p-6 cursor-pointer hover:bg-[#F4F3EF] transition-colors duration-200"
                   onClick={() =>
                     setExpandedOfferId(
                       expandedOfferId === offer.id ? null : offer.id
@@ -536,6 +564,24 @@ export default function OffersV2() {
                           </tbody>
                         </table>
                       </div>
+                    </div>
+
+                    {/* Financial Analysis */}
+                    <div className="mb-8">
+                      <FinancialAnalysis
+                        schoolName={offer.schoolName}
+                        coa={offer.COA}
+                        athleticScholarshipPct={offer.athleticScholarshipPct}
+                        meritAid={
+                          offer.meritAidOverride ||
+                          (offer.meritAidEstimate
+                            ? (offer.meritAidEstimate.low + offer.meritAidEstimate.high) / 2
+                            : 0)
+                        }
+                        annualContribution={offer.annualContribution}
+                        fourYearProjection={true}
+                        tuitionInflationRate={offer.tuitionInflationRate}
+                      />
                     </div>
 
                     {/* Notes */}

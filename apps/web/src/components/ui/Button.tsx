@@ -6,13 +6,13 @@ type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'icon' | 'icon-sm' | 'icon-
 type IconPosition = 'left' | 'right';
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-gold text-bg-primary hover:bg-gold-600 focus-visible:ring-gold',
-  secondary: 'bg-bg-secondary text-text-primary hover:bg-bg-elevated border border-border-bright',
-  ghost: 'text-text-primary hover:bg-bg-secondary',
-  danger: 'bg-error-600 text-white hover:bg-error-700 focus-visible:ring-error-500',
-  success: 'bg-success-600 text-white hover:bg-success-700 focus-visible:ring-success-500',
-  outline: 'border border-border-color text-text-primary hover:bg-bg-secondary',
-  teal: 'bg-teal text-bg-primary hover:bg-teal-600 focus-visible:ring-teal',
+  primary: 'bg-[#1A56DB] text-white hover:opacity-90 focus-visible:ring-[#1A56DB]',
+  secondary: 'bg-[#F4F3EF] text-[#1A1916] hover:bg-[#E8E5DC] border border-[#D8D5CC]',
+  ghost: 'text-[#1A1916] hover:bg-[#F4F3EF]',
+  danger: 'bg-[#C0392B] text-white hover:opacity-90 focus-visible:ring-[#C0392B]',
+  success: 'bg-[#2DD09A] text-white hover:opacity-90 focus-visible:ring-[#2DD09A]',
+  outline: 'border border-[#D8D5CC] text-[#1A1916] hover:bg-[#F4F3EF]',
+  teal: 'bg-[#06B6D4] text-white hover:opacity-90 focus-visible:ring-[#06B6D4]',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

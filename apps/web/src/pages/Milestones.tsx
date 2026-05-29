@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card } from '../components/ui';
+import { Card, GlossaryTerm } from '../components/ui';
 import Layout from '../components/layout/Layout';
 import { useContacts, useExpenses, useOffers } from '../hooks/useApi';
 import { Spinner } from '../components/ui/Spinner';
@@ -129,6 +129,7 @@ interface MilestoneCardProps {
   isUnlocked: boolean;
   celebrateUnlock: boolean;
   onShare: () => void;
+  index?: number;
 }
 
 const MilestoneCard: React.FC<MilestoneCardProps> = ({
@@ -136,6 +137,7 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
   isUnlocked,
   celebrateUnlock,
   onShare,
+  index = 0,
 }) => {
   const progress = (milestone.currentValue / milestone.targetValue) * 100;
   const displayValue = Math.min(milestone.currentValue, milestone.targetValue);
@@ -143,9 +145,10 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
   return (
     <Card
       hoverable
-      className={`relative overflow-hidden transition-all ${
+      className={`relative overflow-hidden transition-all animate-slideUp ${
         isUnlocked ? 'ring-2 ring-gold-500' : ''
       } ${celebrateUnlock ? 'animate-pulse' : ''}`}
+      style={{ animationDelay: `${index * 100}ms` }}
     >
       {celebrateUnlock && (
         <div className="absolute inset-0 bg-gradient-to-t from-gold-500/20 to-transparent pointer-events-none" />
@@ -337,13 +340,14 @@ export const Milestones: React.FC = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categoryMilestones.brand.map((milestone) => (
+              {categoryMilestones.brand.map((milestone, idx) => (
                 <MilestoneCard
                   key={milestone.id}
                   milestone={milestone}
                   isUnlocked={unlockedMilestones.has(milestone.id)}
                   celebrateUnlock={recentlyUnlocked.has(milestone.id)}
                   onShare={() => handleShareMilestone(milestone)}
+                  index={idx}
                 />
               ))}
             </div>
@@ -356,17 +360,18 @@ export const Milestones: React.FC = () => {
                 <span>💰</span> Financial Milestones
               </h2>
               <p className="text-text-secondary text-sm mt-1">
-                Master your recruitment budget and track investments
+                Master your recruitment <GlossaryTerm term="Budget">budget</GlossaryTerm> and track investments
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categoryMilestones.financial.map((milestone) => (
+              {categoryMilestones.financial.map((milestone, idx) => (
                 <MilestoneCard
                   key={milestone.id}
                   milestone={milestone}
                   isUnlocked={unlockedMilestones.has(milestone.id)}
                   celebrateUnlock={recentlyUnlocked.has(milestone.id)}
                   onShare={() => handleShareMilestone(milestone)}
+                  index={idx}
                 />
               ))}
             </div>
@@ -379,17 +384,18 @@ export const Milestones: React.FC = () => {
                 <span>🎓</span> Recruitment Milestones
               </h2>
               <p className="text-text-secondary text-sm mt-1">
-                Progress through your recruiting journey and collect offers
+                Progress through your recruiting journey and collect <GlossaryTerm term="Offered">offers</GlossaryTerm>
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categoryMilestones.recruitment.map((milestone) => (
+              {categoryMilestones.recruitment.map((milestone, idx) => (
                 <MilestoneCard
                   key={milestone.id}
                   milestone={milestone}
                   isUnlocked={unlockedMilestones.has(milestone.id)}
                   celebrateUnlock={recentlyUnlocked.has(milestone.id)}
                   onShare={() => handleShareMilestone(milestone)}
+                  index={idx}
                 />
               ))}
             </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { Card, CardHeader, CardBody, CardFooter, Button, Input, Badge } from '../components/ui';
 import { useToast } from '../components/ui';
@@ -6,6 +7,7 @@ import { useProfile } from '../contexts/ProfileContext';
 import clsx from 'clsx';
 
 export default function Settings() {
+  const navigate = useNavigate();
   const { addToast } = useToast();
   const { currentProfile, updateProfile } = useProfile();
   const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'about'>('profile');
@@ -175,11 +177,12 @@ export default function Settings() {
                   </div>
                 </div>
               </CardBody>
-              <CardFooter>
-                <Button variant="ghost" onClick={handleReset}>
+              <CardFooter className="flex gap-3 justify-end">
+                <Button variant="outline" onClick={handleReset}>
                   Reset
                 </Button>
                 <Button
+                  variant="primary"
                   onClick={handleSave}
                   loading={isSaving}
                   loadingText="Saving..."
@@ -250,12 +253,27 @@ export default function Settings() {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-text-primary mb-2">Terms & Privacy</h3>
+                  <h3 className="font-semibold text-text-primary mb-2">Information</h3>
                   <div className="space-y-2">
-                    <Button size="sm" variant="ghost">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigate('/about')}
+                    >
+                      About AthletiCap
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigate('/legal')}
+                    >
                       Terms of Service
                     </Button>
-                    <Button size="sm" variant="ghost">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigate('/legal')}
+                    >
                       Privacy Policy
                     </Button>
                   </div>

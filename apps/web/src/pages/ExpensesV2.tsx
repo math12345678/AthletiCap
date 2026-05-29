@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Layout from '../components/layout/Layout';
-import { useToast } from '../components/ui';
+import { useToast, GlossaryTerm } from '../components/ui';
 import { useProfile } from '../contexts/ProfileContext';
 import { api } from '../lib/api';
 import clsx from 'clsx';
@@ -129,7 +129,7 @@ interface CategoryCardProps {
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({ category, amount, count }) => (
-  <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4">
+  <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
     <div className="text-xs font-mono uppercase tracking-widest text-[#5C5A54] mb-2">
       {category}
     </div>
@@ -151,7 +151,7 @@ interface ExpenseRowProps {
 }
 
 const ExpenseRow: React.FC<ExpenseRowProps> = ({ expense, onEdit, onDelete, isDeleting }) => (
-  <tr className="border-b border-[#D8D5CC] hover:bg-[#F4F3EF] transition-colors">
+  <tr className="border-b border-[#D8D5CC] hover:bg-[#F4F3EF] transition-colors duration-200">
     <td className="px-4 py-3">
       <div className="font-semibold text-sm text-[#1A1916]">{expense.date}</div>
     </td>
@@ -327,13 +327,13 @@ export default function ExpensesV2() {
       <div className="space-y-8">
         {/* Section 1: Expense Ledger */}
         <section>
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-8 animate-slideUp">
             <h2 className="section-header">
               <span className="section-number"># [1]</span> EXPENSE LEDGER
             </h2>
             <button
               onClick={handleNew}
-              className="px-4 py-2 bg-[#1A56DB] text-white rounded-DEFAULT text-sm font-semibold hover:opacity-90 transition-opacity"
+              className="px-4 py-2 bg-[#1A56DB] text-white rounded-DEFAULT text-sm font-semibold hover:bg-[#1540A8] transition-colors duration-200"
             >
               + Add Expense
             </button>
@@ -342,7 +342,7 @@ export default function ExpensesV2() {
           {/* Summary Cards */}
           {expenseSummary.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4">
+              <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200" style={{ animationDelay: '0ms' }}>
                 <div className="text-xs font-mono uppercase tracking-widest text-[#5C5A54] mb-2">
                   TOTAL CAPEX
                 </div>
@@ -350,13 +350,14 @@ export default function ExpensesV2() {
                   ${totalSpend.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </div>
               </div>
-              {(expenseSummary as any)?.map((cat: any) => (
-                <CategoryCard
-                  key={cat.category}
-                  category={cat.category}
-                  amount={cat.total}
-                  count={cat.count}
-                />
+              {(expenseSummary as any)?.map((cat: any, idx: number) => (
+                <div key={cat.category} className="animate-slideUp" style={{ animationDelay: `${(idx + 1) * 100}ms` }}>
+                  <CategoryCard
+                    category={cat.category}
+                    amount={cat.total}
+                    count={cat.count}
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -373,7 +374,7 @@ export default function ExpensesV2() {
               </button>
             </div>
           ) : (
-            <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT overflow-hidden">
+            <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT overflow-hidden animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>

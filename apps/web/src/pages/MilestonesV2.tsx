@@ -132,30 +132,28 @@ export default function MilestonesV2() {
 
   const sortMilestones = (items: Milestone[]) => {
     const sorted = [...items];
-
-    // Primary sort: status (incomplete first, then overdue, then complete)
     const statusOrder = { incomplete: 0, overdue: 1, complete: 2 };
-    sorted.sort(
-      (a, b) =>
+    const priorityOrder = { high: 0, medium: 1, low: 2 };
+
+    sorted.sort((a, b) => {
+      // Primary sort by selected option
+      if (sortBy === 'priority') {
+        const priorityDiff =
+          (priorityOrder[a.priority as keyof typeof priorityOrder] || 999) -
+          (priorityOrder[b.priority as keyof typeof priorityOrder] || 999);
+        if (priorityDiff !== 0) return priorityDiff;
+      } else {
+        const dateA = new Date(a.dueDate).getTime();
+        const dateB = new Date(b.dueDate).getTime();
+        if (dateA !== dateB) return dateA - dateB;
+      }
+
+      // Secondary sort: status (incomplete first, then overdue, then complete)
+      return (
         (statusOrder[a.status as keyof typeof statusOrder] || 999) -
         (statusOrder[b.status as keyof typeof statusOrder] || 999)
-    );
-
-    // Secondary sort
-    if (sortBy === 'dueDate') {
-      sorted.sort((a, b) => {
-        const aDate = new Date(a.dueDate).getTime();
-        const bDate = new Date(b.dueDate).getTime();
-        return aDate - bDate;
-      });
-    } else if (sortBy === 'priority') {
-      const priorityOrder = { high: 0, medium: 1, low: 2 };
-      sorted.sort(
-        (a, b) =>
-          (priorityOrder[a.priority as keyof typeof priorityOrder] || 999) -
-          (priorityOrder[b.priority as keyof typeof priorityOrder] || 999)
       );
-    }
+    });
 
     return sorted;
   };

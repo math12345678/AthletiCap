@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Layout from '../components/layout/Layout';
-import { useToast } from '../components/ui';
+import { useToast, GlossaryTerm } from '../components/ui';
 import { useProfile } from '../contexts/ProfileContext';
 import { api } from '../lib/api';
 import { STAGE_COLORS, DIVISION_COLORS } from '../lib/chart-colors';
@@ -143,7 +143,7 @@ interface StageCardProps {
 }
 
 const StageCard: React.FC<StageCardProps> = ({ stage, count }) => (
-  <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4 text-center flex-1">
+  <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4 text-center flex-1 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200">
     <div className="text-xs font-mono uppercase tracking-widest text-[#5C5A54] mb-2">
       {stage}
     </div>
@@ -169,7 +169,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onEdit, onDelete, is
   };
 
   return (
-    <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-5 hover:shadow-md transition-all">
+    <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-5 hover:shadow-md transition-all duration-200 animate-slideUp">
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <h4 className="text-sm font-bold text-[#1A1916]">{contact.school}</h4>
@@ -410,13 +410,13 @@ export default function ContactsV2() {
       <div className="space-y-8">
         {/* Section 1: Contact Pipeline */}
         <section>
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-8 animate-slideUp">
             <h2 className="section-header">
               <span className="section-number"># [1]</span> CONTACT PIPELINE
             </h2>
             <button
               onClick={handleNew}
-              className="px-4 py-2 bg-[#1A56DB] text-white rounded-DEFAULT text-sm font-semibold hover:opacity-90 transition-opacity"
+              className="px-4 py-2 bg-[#1A56DB] text-white rounded-DEFAULT text-sm font-semibold hover:bg-[#1540A8] transition-colors duration-200"
             >
               + Add Contact
             </button>
@@ -439,7 +439,7 @@ export default function ContactsV2() {
           {contacts.length > 0 && (
             <div className="space-y-6 mb-8">
               {/* Pipeline Funnel Chart */}
-              <div className="bg-white border border-[#D8D5CC] rounded-sm p-6">
+              <div className="bg-white border border-[#D8D5CC] rounded-sm p-6 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200">
                 <h3 className="text-sm font-semibold text-[#5C5A54] uppercase mb-4">
                   Pipeline Conversion Funnel
                 </h3>
@@ -476,7 +476,7 @@ export default function ContactsV2() {
               </div>
 
               {/* Division Breakdown Chart */}
-              <div className="bg-white border border-[#D8D5CC] rounded-sm p-6">
+              <div className="bg-white border border-[#D8D5CC] rounded-sm p-6 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200">
                 <h3 className="text-sm font-semibold text-[#5C5A54] uppercase mb-4">
                   Contacts by Division
                 </h3>
@@ -547,14 +547,15 @@ export default function ContactsV2() {
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredContacts.map((contact: any) => (
-                <ContactCard
-                  key={contact.id}
-                  contact={contact}
-                  onEdit={handleEdit}
-                  onDelete={(id) => deleteMutation.mutate(id)}
-                  isDeleting={deleteMutation.isPending}
-                />
+              {filteredContacts.map((contact: any, idx: number) => (
+                <div key={contact.id} style={{ animationDelay: `${idx * 50}ms` }}>
+                  <ContactCard
+                    contact={contact}
+                    onEdit={handleEdit}
+                    onDelete={(id) => deleteMutation.mutate(id)}
+                    isDeleting={deleteMutation.isPending}
+                  />
+                </div>
               ))}
             </div>
           ) : (

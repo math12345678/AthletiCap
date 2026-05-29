@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { api } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import Layout from '../components/layout/Layout';
-import { useToast } from '../components/ui';
+import { useToast, GlossaryTerm } from '../components/ui';
 import clsx from 'clsx';
 import {
   LineChart,
@@ -218,20 +218,20 @@ export default function BudgetAdvisor() {
       <div className="space-y-8">
         {/* Section 1: Budget Overview */}
         <section>
-          <h2 className="section-header mb-6">
+          <h2 className="section-header mb-6 animate-slideUp">
             <span className="section-number"># [1]</span> BUDGET INTELLIGENCE ANALYSIS
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4">
+            <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200" style={{ animationDelay: '0ms' }}>
               <div className="text-xs font-mono uppercase tracking-widest text-[#5C5A54] mb-2">
-                TOTAL SPENDING
+                <GlossaryTerm term="Expense">TOTAL SPENDING</GlossaryTerm>
               </div>
               <div className="text-2xl font-mono font-bold text-[#1A1916]">
                 {formatCurrency(totalSpending)}
               </div>
             </div>
-            <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4">
+            <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200" style={{ animationDelay: '100ms' }}>
               <div className="text-xs font-mono uppercase tracking-widest text-[#5C5A54] mb-2">
                 MONTHLY AVG (Simulated)
               </div>
@@ -239,7 +239,7 @@ export default function BudgetAdvisor() {
                 {formatCurrency(averageMonthly)}
               </div>
             </div>
-            <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4">
+            <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200" style={{ animationDelay: '200ms' }}>
               <div className="text-xs font-mono uppercase tracking-widest text-[#5C5A54] mb-2">
                 {simulationMonths}-MONTH PROJECTION
               </div>
@@ -247,7 +247,7 @@ export default function BudgetAdvisor() {
                 {formatCurrency(projectedTotal)}
               </div>
             </div>
-            <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4">
+            <div className="bg-white border border-[#D8D5CC] rounded-DEFAULT p-4 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200" style={{ animationDelay: '300ms' }}>
               <div className="text-xs font-mono uppercase tracking-widest text-[#5C5A54] mb-2">
                 SPENDING TREND
               </div>
@@ -262,13 +262,13 @@ export default function BudgetAdvisor() {
         </section>
 
         {/* Section 2: Complexity Metrics */}
-        <section className="bg-[#FFFFFF] border border-[#D8D5CC] rounded-DEFAULT p-6">
+        <section className="bg-[#FFFFFF] border border-[#D8D5CC] rounded-DEFAULT p-6 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200">
           <h3 className="section-header mb-6">
             <span className="section-number"># [2]</span> COMPLEXITY METRICS
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-[#F4F3EF] rounded-DEFAULT p-6 border border-[#D8D5CC]">
+            <div className="bg-[#F4F3EF] rounded-DEFAULT p-6 border border-[#D8D5CC] animate-slideUp" style={{ animationDelay: '100ms' }}>
               <div className="text-xs font-mono uppercase tracking-widest text-[#5C5A54] mb-3">
                 Spending Volatility
               </div>
@@ -288,7 +288,7 @@ export default function BudgetAdvisor() {
               </div>
             </div>
 
-            <div className="bg-[#F4F3EF] rounded-DEFAULT p-6 border border-[#D8D5CC]">
+            <div className="bg-[#F4F3EF] rounded-DEFAULT p-6 border border-[#D8D5CC] animate-slideUp" style={{ animationDelay: '200ms' }}>
               <div className="text-xs font-mono uppercase tracking-widest text-[#5C5A54] mb-3">
                 Predictability Score
               </div>
@@ -308,7 +308,7 @@ export default function BudgetAdvisor() {
               </div>
             </div>
 
-            <div className="bg-[#F4F3EF] rounded-DEFAULT p-6 border border-[#D8D5CC]">
+            <div className="bg-[#F4F3EF] rounded-DEFAULT p-6 border border-[#D8D5CC] animate-slideUp" style={{ animationDelay: '300ms' }}>
               <div className="text-xs font-mono uppercase tracking-widest text-[#5C5A54] mb-3">
                 Category Dispersion
               </div>
@@ -328,7 +328,7 @@ export default function BudgetAdvisor() {
         </section>
 
         {/* Section 3: Monte Carlo Simulation */}
-        <section className="bg-[#FFFFFF] border border-[#D8D5CC] rounded-DEFAULT p-6">
+        <section className="bg-[#FFFFFF] border border-[#D8D5CC] rounded-DEFAULT p-6 animate-slideUp shadow-sm hover:shadow-md transition-shadow duration-200">
           <div className="flex items-center justify-between mb-6">
             <h3 className="section-header">
               <span className="section-number"># [3]</span> MONTE CARLO PROJECTION

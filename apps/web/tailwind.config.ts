@@ -71,10 +71,13 @@ export default {
     },
     extend: {
       animation: {
-        slideUp: 'slideUp 300ms cubic-bezier(0, 0, 0.2, 1)',
-        slideDown: 'slideDown 300ms cubic-bezier(0, 0, 0.2, 1)',
-        fadeIn: 'fadeIn 200ms cubic-bezier(0, 0, 0.2, 1)',
-        fadeOut: 'fadeOut 200ms cubic-bezier(0.4, 0, 1, 1)',
+        slideUp: 'slideUp 250ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        slideDown: 'slideDown 250ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        fadeIn: 'fadeIn 200ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        fadeOut: 'fadeOut 150ms cubic-bezier(0.4, 0, 1, 1)',
+        scaleIn: 'scaleIn 250ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        slideUpStagger: 'slideUp 250ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        floatHover: 'floatHover 200ms cubic-bezier(0.34, 1.56, 0.64, 1)',
         pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         shimmer: 'shimmer 2s infinite',
         bounce: 'bounce 1s infinite',
@@ -83,11 +86,11 @@ export default {
       },
       keyframes: {
         slideUp: {
-          from: { transform: 'translateY(20px)', opacity: '0' },
+          from: { transform: 'translateY(16px)', opacity: '0' },
           to: { transform: 'translateY(0)', opacity: '1' },
         },
         slideDown: {
-          from: { transform: 'translateY(-20px)', opacity: '0' },
+          from: { transform: 'translateY(-16px)', opacity: '0' },
           to: { transform: 'translateY(0)', opacity: '1' },
         },
         fadeIn: {
@@ -97,6 +100,14 @@ export default {
         fadeOut: {
           from: { opacity: '1' },
           to: { opacity: '0' },
+        },
+        scaleIn: {
+          from: { transform: 'scale(0.95)', opacity: '0' },
+          to: { transform: 'scale(1)', opacity: '1' },
+        },
+        floatHover: {
+          from: { transform: 'translateY(0)' },
+          to: { transform: 'translateY(-3px)' },
         },
         shimmer: {
           '0%, 100%': { opacity: '1' },

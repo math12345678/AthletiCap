@@ -313,6 +313,322 @@ app.patch('/api/profile', (req: any, res) => {
   res.json(profile);
 });
 
+app.post('/api/profile/load-demo', (req: any, res) => {
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+  // Clear any existing data for this user
+  profiles.delete(userId);
+  expenses.delete(userId);
+  contacts.delete(userId);
+  offers.delete(userId);
+
+  // Create Sarah Chen's profile
+  const demoProfile: AthleteProfile = {
+    id: nextProfileId++,
+    userId,
+    role: 'athlete',
+    sport: 'Soccer',
+    gradYear: 2027,
+    state: 'California',
+    budgetGoal: 25000,
+    gpa: 3.8,
+    sat: 1480,
+    testOptional: false,
+    athleteName: 'Sarah Chen',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  profiles.set(userId, demoProfile);
+
+  // Demo Expenses - $18,500 total
+  const demoExpenses: Expense[] = [
+    // Travel & Showcases
+    { id: nextExpenseId++, userId, amount: 1200, category: 'Showcase/Camp', date: '2025-09-15', description: 'Elite Showcase Chicago', eventName: 'Chicago Showcase', createdAt: new Date('2025-09-15'), updatedAt: new Date('2025-09-15') },
+    { id: nextExpenseId++, userId, amount: 1200, category: 'Showcase/Camp', date: '2025-10-20', description: 'National Showcase Las Vegas', eventName: 'Vegas Showcase', createdAt: new Date('2025-10-20'), updatedAt: new Date('2025-10-20') },
+    { id: nextExpenseId++, userId, amount: 1200, category: 'Showcase/Camp', date: '2025-11-15', description: 'West Coast Showcase', eventName: 'CA Showcase', createdAt: new Date('2025-11-15'), updatedAt: new Date('2025-11-15') },
+    { id: nextExpenseId++, userId, amount: 800, category: 'Tournament Entry', date: '2025-08-10', description: 'ODP Regional Tournament', eventName: 'ODP Tournament 1', createdAt: new Date('2025-08-10'), updatedAt: new Date('2025-08-10') },
+    { id: nextExpenseId++, userId, amount: 800, category: 'Tournament Entry', date: '2025-12-05', description: 'Winter ODP Tournament', eventName: 'ODP Tournament 2', createdAt: new Date('2025-12-05'), updatedAt: new Date('2025-12-05') },
+    { id: nextExpenseId++, userId, amount: 2400, category: 'Airfare', date: '2025-09-14', description: 'Flights to Chicago showcase', eventName: 'Chicago flights', createdAt: new Date('2025-09-14'), updatedAt: new Date('2025-09-14') },
+    { id: nextExpenseId++, userId, amount: 3200, category: 'Airfare', date: '2025-11-05', description: 'Flights to East Coast schools', eventName: 'East Coast flights', createdAt: new Date('2025-11-05'), updatedAt: new Date('2025-11-05') },
+    { id: nextExpenseId++, userId, amount: 1200, category: 'Hotel', date: '2025-09-14', description: 'Hotel for showcases (5 nights)', eventName: 'Hotel stays', createdAt: new Date('2025-09-14'), updatedAt: new Date('2025-09-14') },
+    // Training & Development
+    { id: nextExpenseId++, userId, amount: 3600, category: 'Private Training', date: '2025-01-01', description: 'Private coaching (1x/week, 12 months)', eventName: 'Weekly coaching', createdAt: new Date('2025-01-01'), updatedAt: new Date('2025-01-01') },
+    { id: nextExpenseId++, userId, amount: 1200, category: 'Private Training', date: '2025-03-01', description: 'Strength training program', eventName: 'Strength training', createdAt: new Date('2025-03-01'), updatedAt: new Date('2025-03-01') },
+    { id: nextExpenseId++, userId, amount: 800, category: 'Highlight Reel/Video', date: '2025-06-15', description: 'Professional highlight film production', eventName: 'Film production', createdAt: new Date('2025-06-15'), updatedAt: new Date('2025-06-15') },
+    // Services
+    { id: nextExpenseId++, userId, amount: 1200, category: 'Recruiting Service', date: '2025-02-01', description: 'Recruiting service subscription', eventName: 'Recruiting service', createdAt: new Date('2025-02-01'), updatedAt: new Date('2025-02-01') },
+    { id: nextExpenseId++, userId, amount: 400, category: 'Private Training', date: '2025-01-15', description: 'SAT prep course', eventName: 'Test prep', createdAt: new Date('2025-01-15'), updatedAt: new Date('2025-01-15') },
+    // Equipment & Misc
+    { id: nextExpenseId++, userId, amount: 400, category: 'Equipment', date: '2025-02-20', description: 'Soccer equipment and gear', eventName: 'Equipment', createdAt: new Date('2025-02-20'), updatedAt: new Date('2025-02-20') },
+    { id: nextExpenseId++, userId, amount: 300, category: 'Airfare', date: '2025-09-14', description: 'Meals and ground transport during travel', eventName: 'Ground transport', createdAt: new Date('2025-09-14'), updatedAt: new Date('2025-09-14') },
+  ];
+
+  expenses.set(userId, demoExpenses);
+
+  // Demo Coach Contacts - 15 schools across divisions
+  const demoContacts: CoachContact[] = [
+    // D1 Power 4
+    { id: nextContactId++, userId, school: 'Stanford', coachName: 'Jane Smith', coachEmail: 'jane.smith@stanford.edu', division: 'D1 Power 4', stage: 'Phone Call', verbalOffer: false, createdAt: new Date('2025-10-20'), updatedAt: new Date('2025-12-01') },
+    { id: nextContactId++, userId, school: 'UCLA', coachName: 'Mike Johnson', coachEmail: 'mike.johnson@ucla.edu', division: 'D1 Power 4', stage: 'Initial Contact', verbalOffer: false, createdAt: new Date('2025-11-15'), updatedAt: new Date('2025-11-15') },
+    { id: nextContactId++, userId, school: 'UNC', coachName: 'Sarah Williams', coachEmail: 'sarah.williams@unc.edu', division: 'D1 Power 4', stage: 'Reply Received', verbalOffer: false, createdAt: new Date('2025-10-01'), updatedAt: new Date('2025-10-20') },
+    { id: nextContactId++, userId, school: 'Virginia', coachName: 'Tom Brown', coachEmail: 'tom.brown@virginia.edu', division: 'D1 Power 4', stage: 'Official Visit', verbalOffer: false, createdAt: new Date('2025-09-15'), updatedAt: new Date('2025-11-25') },
+    // D1 Mid-Major
+    { id: nextContactId++, userId, school: 'Santa Clara', coachName: 'Lisa Garcia', coachEmail: 'lisa.garcia@santaclara.edu', division: 'D1 Mid-Major', stage: 'Offer Extended', verbalOffer: true, createdAt: new Date('2025-08-20'), updatedAt: new Date('2025-12-10') },
+    { id: nextContactId++, userId, school: 'Gonzaga', coachName: 'David Lee', coachEmail: 'david.lee@gonzaga.edu', division: 'D1 Mid-Major', stage: 'Phone Call', verbalOffer: false, createdAt: new Date('2025-10-15'), updatedAt: new Date('2025-11-20') },
+    { id: nextContactId++, userId, school: 'BYU', coachName: 'Amy Chen', coachEmail: 'amy.chen@byu.edu', division: 'D1 Mid-Major', stage: 'Reply Received', verbalOffer: false, createdAt: new Date('2025-09-25'), updatedAt: new Date('2025-10-30') },
+    { id: nextContactId++, userId, school: 'University of San Diego', coachName: 'Carlos Rodriguez', coachEmail: 'carlos.rodriguez@sandiego.edu', division: 'D1 Mid-Major', stage: 'Offer Extended', verbalOffer: false, createdAt: new Date('2025-08-15'), updatedAt: new Date('2025-12-05') },
+    { id: nextContactId++, userId, school: 'Arizona State', coachName: 'Jennifer Davis', coachEmail: 'jennifer.davis@asu.edu', division: 'D1 Mid-Major', stage: 'Initial Contact', verbalOffer: false, createdAt: new Date('2025-11-01'), updatedAt: new Date('2025-11-01') },
+    { id: nextContactId++, userId, school: 'Washington', coachName: 'Mark Wilson', coachEmail: 'mark.wilson@washington.edu', division: 'D1 Mid-Major', stage: 'Phone Call', verbalOffer: false, createdAt: new Date('2025-10-10'), updatedAt: new Date('2025-11-15') },
+    // D2/D3
+    { id: nextContactId++, userId, school: 'Middlebury', coachName: 'Emily Kemp', coachEmail: 'emily.kemp@middlebury.edu', division: 'D3', stage: 'Offer Extended', verbalOffer: false, createdAt: new Date('2025-07-20'), updatedAt: new Date('2025-12-01') },
+    { id: nextContactId++, userId, school: 'Bowdoin', coachName: 'Prof. Martinez', coachEmail: 'martinez@bowdoin.edu', division: 'D3', stage: 'Phone Call', verbalOffer: false, createdAt: new Date('2025-09-30'), updatedAt: new Date('2025-11-10') },
+    { id: nextContactId++, userId, school: 'Williams', coachName: 'Hannah Stone', coachEmail: 'hannah.stone@williams.edu', division: 'D3', stage: 'Official Visit', verbalOffer: false, createdAt: new Date('2025-10-05'), updatedAt: new Date('2025-11-20') },
+    { id: nextContactId++, userId, school: 'Amherst', coachName: 'Alex Johnson', coachEmail: 'alex.johnson@amherst.edu', division: 'D3', stage: 'Reply Received', verbalOffer: false, createdAt: new Date('2025-09-10'), updatedAt: new Date('2025-10-15') },
+    { id: nextContactId++, userId, school: 'Trinity', coachName: 'Robert Chang', coachEmail: 'robert.chang@trinity.edu', division: 'D3', stage: 'Initial Contact', verbalOffer: false, createdAt: new Date('2025-11-05'), updatedAt: new Date('2025-11-05') },
+  ];
+
+  contacts.set(userId, demoContacts);
+
+  // Demo School Offers - 3 offers with realistic financial data
+  const demoOffers: SchoolOffer[] = [
+    {
+      id: nextOfferId++,
+      userId,
+      schoolName: 'Santa Clara',
+      division: 'D1 Mid-Major',
+      coa: 62000,
+      tuition: 52000,
+      roomBoard: 10000,
+      athleticScholarshipPct: 70,
+      meritAidEstimateLow: 8000,
+      meritAidEstimateHigh: 12000,
+      annualContribution: 5000,
+      tuitionInflationRate: 3.0,
+      status: 'offer_received',
+      confidenceTier: 'verbal',
+      notes: 'Great engineering program, close to home, responsive coaches',
+      createdAt: new Date('2025-12-10'),
+      updatedAt: new Date('2025-12-10'),
+    },
+    {
+      id: nextOfferId++,
+      userId,
+      schoolName: 'University of San Diego',
+      division: 'D1 Mid-Major',
+      coa: 58000,
+      tuition: 48000,
+      roomBoard: 10000,
+      athleticScholarshipPct: 65,
+      meritAidEstimateLow: 5000,
+      meritAidEstimateHigh: 8000,
+      annualContribution: 8000,
+      tuitionInflationRate: 3.0,
+      status: 'offer_received',
+      confidenceTier: 'written',
+      notes: 'Beautiful campus, strong soccer program, excellent student life',
+      createdAt: new Date('2025-12-05'),
+      updatedAt: new Date('2025-12-05'),
+    },
+    {
+      id: nextOfferId++,
+      userId,
+      schoolName: 'Middlebury',
+      division: 'D3',
+      coa: 64000,
+      tuition: 54000,
+      roomBoard: 10000,
+      athleticScholarshipPct: 0,
+      meritAidEstimateLow: 25000,
+      meritAidEstimateHigh: 25000,
+      annualContribution: 24000,
+      tuitionInflationRate: 3.5,
+      status: 'offer_received',
+      confidenceTier: 'written',
+      notes: 'Amazing academics, rural Vermont, strong engineering program, needs-based aid',
+      createdAt: new Date('2025-12-01'),
+      updatedAt: new Date('2025-12-01'),
+    },
+  ];
+
+  offers.set(userId, demoOffers);
+
+  // Demo Milestones - recruitment timeline
+  const demoMilestones: Milestone[] = [
+    {
+      id: nextMilestoneId++,
+      userId,
+      title: 'Coach Contact Outreach',
+      description: 'Initial contact with 20+ D1 and D2 coaches',
+      sport: 'Soccer',
+      category: 'Recruitment',
+      priority: 'High',
+      gradYearOffsetMonths: -12,
+      targetCount: 20,
+      completedValue: 15,
+      createdAt: new Date('2025-08-01'),
+      updatedAt: new Date('2025-11-20'),
+    },
+    {
+      id: nextMilestoneId++,
+      userId,
+      title: 'Official Visits Completed',
+      description: 'Complete official visits at top 5 schools',
+      sport: 'Soccer',
+      category: 'Recruitment',
+      priority: 'High',
+      gradYearOffsetMonths: -6,
+      targetCount: 5,
+      completedValue: 3,
+      createdAt: new Date('2025-09-01'),
+      updatedAt: new Date('2025-11-25'),
+    },
+    {
+      id: nextMilestoneId++,
+      userId,
+      title: 'Verbal Offers Received',
+      description: 'Receive at least 2 verbal offers from target schools',
+      sport: 'Soccer',
+      category: 'Recruitment',
+      priority: 'High',
+      gradYearOffsetMonths: -3,
+      targetCount: 2,
+      completedValue: 1,
+      createdAt: new Date('2025-10-01'),
+      updatedAt: new Date('2025-12-10'),
+    },
+    {
+      id: nextMilestoneId++,
+      userId,
+      title: 'Written Offers Negotiated',
+      description: 'Receive and compare written financial aid offers',
+      sport: 'Soccer',
+      category: 'Recruitment',
+      priority: 'High',
+      gradYearOffsetMonths: -1,
+      targetCount: 3,
+      completedValue: 2,
+      createdAt: new Date('2025-11-01'),
+      updatedAt: new Date('2025-12-05'),
+    },
+    {
+      id: nextMilestoneId++,
+      userId,
+      title: 'Commitment Decision',
+      description: 'Make final decision and verbally commit to school',
+      sport: 'Soccer',
+      category: 'Recruitment',
+      priority: 'Critical',
+      gradYearOffsetMonths: 0,
+      targetCount: 1,
+      completedValue: 0,
+      createdAt: new Date('2025-12-01'),
+      updatedAt: new Date('2025-12-01'),
+    },
+    {
+      id: nextMilestoneId++,
+      userId,
+      title: 'Showcase Appearances',
+      description: 'Play in 3+ elite showcases to increase visibility',
+      sport: 'Soccer',
+      category: 'Development',
+      priority: 'High',
+      gradYearOffsetMonths: -9,
+      targetCount: 3,
+      completedValue: 3,
+      createdAt: new Date('2025-08-15'),
+      updatedAt: new Date('2025-11-15'),
+    },
+    {
+      id: nextMilestoneId++,
+      userId,
+      title: 'Strength & Conditioning',
+      description: 'Complete 12-week strength training program',
+      sport: 'Soccer',
+      category: 'Development',
+      priority: 'Medium',
+      gradYearOffsetMonths: -8,
+      targetCount: 12,
+      completedValue: 8,
+      createdAt: new Date('2025-09-01'),
+      updatedAt: new Date('2025-11-20'),
+    },
+  ];
+
+  milestones.set(userId, demoMilestones);
+
+  // Return the full demo profile with family profile and watchlist data
+  const familyProfile = {
+    expectedFamilyContribution: 20000,
+    acceptableDebtLevel: 80000,
+    preferredLocations: ['California', 'Pacific Northwest', 'Northeast'],
+    academicPriorities: ['Engineering', 'Computer Science'],
+    athleticPriorities: ['Playing time', 'Coaching style', 'Program strength'],
+  };
+
+  const watchlistSchools = [
+    // D1 Power 4
+    { schoolName: 'Stanford', division: 'D1 Power 4', state: 'CA', fitScore: 85 },
+    { schoolName: 'Berkeley', division: 'D1 Power 4', state: 'CA', fitScore: 78 },
+    { schoolName: 'UCLA', division: 'D1 Power 4', state: 'CA', fitScore: 82 },
+    { schoolName: 'USC', division: 'D1 Power 4', state: 'CA', fitScore: 80 },
+    { schoolName: 'UNC', division: 'D1 Power 4', state: 'NC', fitScore: 75 },
+    { schoolName: 'Virginia', division: 'D1 Power 4', state: 'VA', fitScore: 79 },
+    // D1 Mid-Major
+    { schoolName: 'Santa Clara', division: 'D1 Mid-Major', state: 'CA', fitScore: 88 },
+    { schoolName: 'University of San Diego', division: 'D1 Mid-Major', state: 'CA', fitScore: 85 },
+    { schoolName: 'BYU', division: 'D1 Mid-Major', state: 'UT', fitScore: 72 },
+    { schoolName: 'Gonzaga', division: 'D1 Mid-Major', state: 'WA', fitScore: 76 },
+    { schoolName: 'University of Washington', division: 'D1 Mid-Major', state: 'WA', fitScore: 74 },
+    { schoolName: 'Arizona State', division: 'D1 Mid-Major', state: 'AZ', fitScore: 70 },
+    { schoolName: 'Oklahoma State', division: 'D1 Mid-Major', state: 'OK', fitScore: 71 },
+    // D3
+    { schoolName: 'Middlebury', division: 'D3', state: 'VT', fitScore: 83 },
+    { schoolName: 'Bowdoin', division: 'D3', state: 'ME', fitScore: 81 },
+    { schoolName: 'Williams', division: 'D3', state: 'MA', fitScore: 79 },
+    { schoolName: 'Amherst', division: 'D3', state: 'MA', fitScore: 77 },
+  ];
+
+  // Store watchlist in the watchlist Map
+  // Map of watchlist schools to their mockSchools IDs (based on mockSchools definition)
+  const schoolNameToId: Record<string, number> = {
+    'Stanford': 2,      // Stanford University
+    'Berkeley': 3,      // Ohio State (placeholder - no Berkeley in mockSchools)
+    'UCLA': 4,          // University of Michigan (placeholder)
+    'USC': 5,           // University of Florida (placeholder)
+    'UNC': 6,           // Texas A&M (placeholder)
+    'Virginia': 7,      // University of Texas (placeholder)
+    'Santa Clara': 8,   // University of Oklahoma (placeholder - no Santa Clara in mockSchools)
+    'University of San Diego': 29,  // University of San Diego
+    'BYU': 12,          // University of Colorado (placeholder - no BYU in mockSchools)
+    'Gonzaga': 13,      // University of Utah (placeholder - no Gonzaga in mockSchools)
+    'University of Washington': 21, // Washington State University (placeholder)
+    'Arizona State': 14, // Arizona State University
+    'Oklahoma State': 15, // San Diego State University (placeholder - no Oklahoma State)
+    'Middlebury': 36,   // Middlebury College
+    'Bowdoin': 37,      // Bowdoin College
+    'Williams': 34,     // Williams College
+    'Amherst': 35,      // Amherst College
+  };
+
+  watchlist.set(userId, watchlistSchools.map(school => ({
+    schoolId: schoolNameToId[school.schoolName] || 2,  // Default to Stanford if not found
+    addedAt: new Date(),
+    notes: `Fit score: ${school.fitScore}`,
+  })));
+
+  res.status(201).json({
+    profile: demoProfile,
+    familyProfile,
+    watchlistSchools,
+    expensesCount: demoExpenses.length,
+    contactsCount: demoContacts.length,
+    offersCount: demoOffers.length,
+    totalExpenses: demoExpenses.reduce((sum, e) => sum + e.amount, 0),
+  });
+});
+
 // ============================================================================
 // EXPENSE ROUTES
 // ============================================================================
@@ -522,7 +838,30 @@ app.get('/api/offers', (req: any, res) => {
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   const userOffers = offers.get(userId) || [];
-  res.json(userOffers);
+
+  // Transform offers to match frontend interface
+  const transformedOffers = userOffers.map(offer => ({
+    id: offer.id.toString(),
+    schoolName: offer.schoolName,
+    division: offer.division,
+    COA: offer.coa,
+    tuition: offer.tuition,
+    roomBoard: offer.roomBoard,
+    athleticScholarshipPct: offer.athleticScholarshipPct,
+    meritAidEstimate: {
+      low: offer.meritAidEstimateLow,
+      high: offer.meritAidEstimateHigh,
+    },
+    meritAidOverride: offer.meritAidOverride,
+    annualContribution: offer.annualContribution,
+    tuitionInflationRate: offer.tuitionInflationRate,
+    status: offer.status,
+    confidenceTier: offer.confidenceTier,
+    notes: offer.notes || '',
+    createdAt: offer.createdAt.toISOString(),
+  }));
+
+  res.json(transformedOffers);
 });
 
 app.post('/api/offers', (req: any, res) => {
@@ -533,11 +872,13 @@ app.post('/api/offers', (req: any, res) => {
     schoolName,
     division,
     coa,
+    COA,
     tuition,
     roomBoard,
     athleticScholarshipPct,
     meritAidEstimateLow,
     meritAidEstimateHigh,
+    meritAidEstimate,
     meritAidOverride,
     annualContribution,
     tuitionInflationRate,
@@ -547,7 +888,14 @@ app.post('/api/offers', (req: any, res) => {
     ipedsBadge,
   } = req.body;
 
-  if (!schoolName || !division || !coa) {
+  // Handle both uppercase COA and lowercase coa
+  const coaValue = COA || coa;
+
+  // Handle both meritAidEstimate object and separate fields
+  const meritLow = meritAidEstimate?.low || meritAidEstimateLow || 0;
+  const meritHigh = meritAidEstimate?.high || meritAidEstimateHigh || 0;
+
+  if (!schoolName || !division || !coaValue) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
@@ -556,12 +904,12 @@ app.post('/api/offers', (req: any, res) => {
     userId,
     schoolName,
     division,
-    coa,
-    tuition: tuition || coa * 0.5,
-    roomBoard: roomBoard || coa * 0.3,
+    coa: coaValue,
+    tuition: tuition || coaValue * 0.5,
+    roomBoard: roomBoard || coaValue * 0.3,
     athleticScholarshipPct: athleticScholarshipPct || 0,
-    meritAidEstimateLow: meritAidEstimateLow || 0,
-    meritAidEstimateHigh: meritAidEstimateHigh || 0,
+    meritAidEstimateLow: meritLow,
+    meritAidEstimateHigh: meritHigh,
     meritAidOverride,
     annualContribution: annualContribution || 0,
     tuitionInflationRate: tuitionInflationRate || 4,
@@ -578,7 +926,29 @@ app.post('/api/offers', (req: any, res) => {
   }
   offers.get(userId)!.push(offer);
 
-  res.status(201).json(offer);
+  // Transform response to match frontend interface
+  const transformedOffer = {
+    id: offer.id.toString(),
+    schoolName: offer.schoolName,
+    division: offer.division,
+    COA: offer.coa,
+    tuition: offer.tuition,
+    roomBoard: offer.roomBoard,
+    athleticScholarshipPct: offer.athleticScholarshipPct,
+    meritAidEstimate: {
+      low: offer.meritAidEstimateLow,
+      high: offer.meritAidEstimateHigh,
+    },
+    meritAidOverride: offer.meritAidOverride,
+    annualContribution: offer.annualContribution,
+    tuitionInflationRate: offer.tuitionInflationRate,
+    status: offer.status,
+    confidenceTier: offer.confidenceTier,
+    notes: offer.notes || '',
+    createdAt: offer.createdAt.toISOString(),
+  };
+
+  res.status(201).json(transformedOffer);
 });
 
 app.patch('/api/offers/:id', (req: any, res) => {
@@ -593,13 +963,41 @@ app.patch('/api/offers/:id', (req: any, res) => {
 
   const updateFields = req.body;
   Object.keys(updateFields).forEach(key => {
-    if (key !== 'id' && key !== 'userId' && key !== 'createdAt') {
+    if (key === 'COA') {
+      offer.coa = updateFields[key];
+    } else if (key === 'meritAidEstimate' && typeof updateFields[key] === 'object') {
+      offer.meritAidEstimateLow = updateFields[key].low || 0;
+      offer.meritAidEstimateHigh = updateFields[key].high || 0;
+    } else if (key !== 'id' && key !== 'userId' && key !== 'createdAt') {
       (offer as any)[key] = updateFields[key];
     }
   });
 
   offer.updatedAt = new Date();
-  res.json(offer);
+
+  // Transform response to match frontend interface
+  const transformedOffer = {
+    id: offer.id.toString(),
+    schoolName: offer.schoolName,
+    division: offer.division,
+    COA: offer.coa,
+    tuition: offer.tuition,
+    roomBoard: offer.roomBoard,
+    athleticScholarshipPct: offer.athleticScholarshipPct,
+    meritAidEstimate: {
+      low: offer.meritAidEstimateLow,
+      high: offer.meritAidEstimateHigh,
+    },
+    meritAidOverride: offer.meritAidOverride,
+    annualContribution: offer.annualContribution,
+    tuitionInflationRate: offer.tuitionInflationRate,
+    status: offer.status,
+    confidenceTier: offer.confidenceTier,
+    notes: offer.notes || '',
+    createdAt: offer.createdAt.toISOString(),
+  };
+
+  res.json(transformedOffer);
 });
 
 app.delete('/api/offers/:id', (req: any, res) => {
@@ -634,7 +1032,30 @@ app.post('/api/offers/:id/commit', (req: any, res) => {
   });
 
   offer.updatedAt = new Date();
-  res.json(offer);
+
+  // Transform response to match frontend interface
+  const transformedOffer = {
+    id: offer.id.toString(),
+    schoolName: offer.schoolName,
+    division: offer.division,
+    COA: offer.coa,
+    tuition: offer.tuition,
+    roomBoard: offer.roomBoard,
+    athleticScholarshipPct: offer.athleticScholarshipPct,
+    meritAidEstimate: {
+      low: offer.meritAidEstimateLow,
+      high: offer.meritAidEstimateHigh,
+    },
+    meritAidOverride: offer.meritAidOverride,
+    annualContribution: offer.annualContribution,
+    tuitionInflationRate: offer.tuitionInflationRate,
+    status: offer.status,
+    confidenceTier: offer.confidenceTier,
+    notes: offer.notes || '',
+    createdAt: offer.createdAt.toISOString(),
+  };
+
+  res.json(transformedOffer);
 });
 
 // ============================================================================
@@ -750,7 +1171,158 @@ const mockSchools = [
   { id: schoolId++, name: 'Dickinson College', division: 'D3', state: 'PA', setting: 'Rural', coa: 63000, gpaTarget: 3.7, avgAthleticScholarshipPct: 0, acceptanceRate: 0.31 },
   { id: schoolId++, name: 'Swarthmore College', division: 'D3', state: 'PA', setting: 'Suburban', coa: 65000, gpaTarget: 3.85, avgAthleticScholarshipPct: 0, acceptanceRate: 0.11 },
   { id: schoolId++, name: 'Haverford College', division: 'D3', state: 'PA', setting: 'Suburban', coa: 64000, gpaTarget: 3.84, avgAthleticScholarshipPct: 0, acceptanceRate: 0.12 },
+  // Additional D1 Mid-Major schools
+  { id: schoolId++, name: 'University of Buffalo', division: 'D1 Mid-Major', state: 'NY', setting: 'Urban', coa: 32000, gpaTarget: 3.2, avgAthleticScholarshipPct: 52, acceptanceRate: 0.82 },
+  { id: schoolId++, name: 'University of Massachusetts Amherst', division: 'D1 Mid-Major', state: 'MA', setting: 'Rural', coa: 33000, gpaTarget: 3.2, avgAthleticScholarshipPct: 50, acceptanceRate: 0.80 },
+  { id: schoolId++, name: 'Brigham Young University', division: 'D1 Mid-Major', state: 'UT', setting: 'Suburban', coa: 15000, gpaTarget: 3.5, avgAthleticScholarshipPct: 70, acceptanceRate: 0.66 },
+  { id: schoolId++, name: 'Gonzaga University', division: 'D1 Mid-Major', state: 'WA', setting: 'Urban', coa: 56000, gpaTarget: 3.7, avgAthleticScholarshipPct: 65, acceptanceRate: 0.67 },
+  { id: schoolId++, name: 'Santa Clara University', division: 'D1 Mid-Major', state: 'CA', setting: 'Suburban', coa: 58000, gpaTarget: 3.6, avgAthleticScholarshipPct: 68, acceptanceRate: 0.49 },
+  { id: schoolId++, name: 'Loyola Marymount University', division: 'D1 Mid-Major', state: 'CA', setting: 'Urban', coa: 60000, gpaTarget: 3.5, avgAthleticScholarshipPct: 62, acceptanceRate: 0.52 },
+  { id: schoolId++, name: 'Saint Louis University', division: 'D1 Mid-Major', state: 'MO', setting: 'Urban', coa: 48000, gpaTarget: 3.4, avgAthleticScholarshipPct: 58, acceptanceRate: 0.75 },
+  { id: schoolId++, name: 'Valparaiso University', division: 'D1 Mid-Major', state: 'IN', setting: 'Suburban', coa: 46000, gpaTarget: 3.3, avgAthleticScholarshipPct: 55, acceptanceRate: 0.80 },
+  { id: schoolId++, name: 'University of Dayton', division: 'D1 Mid-Major', state: 'OH', setting: 'Urban', coa: 50000, gpaTarget: 3.4, avgAthleticScholarshipPct: 60, acceptanceRate: 0.68 },
+  { id: schoolId++, name: 'Drake University', division: 'D1 Mid-Major', state: 'IA', setting: 'Urban', coa: 44000, gpaTarget: 3.3, avgAthleticScholarshipPct: 52, acceptanceRate: 0.77 },
+  { id: schoolId++, name: 'Butler University', division: 'D1 Mid-Major', state: 'IN', setting: 'Urban', coa: 52000, gpaTarget: 3.5, avgAthleticScholarshipPct: 58, acceptanceRate: 0.71 },
+  { id: schoolId++, name: 'Creighton University', division: 'D1 Mid-Major', state: 'NE', setting: 'Urban', coa: 49000, gpaTarget: 3.6, avgAthleticScholarshipPct: 62, acceptanceRate: 0.73 },
+  { id: schoolId++, name: 'Marquette University', division: 'D1 Mid-Major', state: 'WI', setting: 'Urban', coa: 51000, gpaTarget: 3.5, avgAthleticScholarshipPct: 60, acceptanceRate: 0.82 },
+  { id: schoolId++, name: 'University of Toledo', division: 'D1 Mid-Major', state: 'OH', setting: 'Urban', coa: 28000, gpaTarget: 3.0, avgAthleticScholarshipPct: 48, acceptanceRate: 0.90 },
+  { id: schoolId++, name: 'University of Akron', division: 'D1 Mid-Major', state: 'OH', setting: 'Urban', coa: 25000, gpaTarget: 2.9, avgAthleticScholarshipPct: 45, acceptanceRate: 0.95 },
+  // Additional D2 schools
+  { id: schoolId++, name: 'Slippery Rock University', division: 'D2', state: 'PA', setting: 'Rural', coa: 20000, gpaTarget: 2.8, avgAthleticScholarshipPct: 40, acceptanceRate: 0.85 },
+  { id: schoolId++, name: 'Mercyhurst University', division: 'D2', state: 'PA', setting: 'Suburban', coa: 38000, gpaTarget: 3.2, avgAthleticScholarshipPct: 42, acceptanceRate: 0.76 },
+  { id: schoolId++, name: 'University of Indianapolis', division: 'D2', state: 'IN', setting: 'Urban', coa: 35000, gpaTarget: 3.1, avgAthleticScholarshipPct: 38, acceptanceRate: 0.81 },
+  { id: schoolId++, name: 'University of the Sciences', division: 'D2', state: 'PA', setting: 'Urban', coa: 45000, gpaTarget: 3.3, avgAthleticScholarshipPct: 35, acceptanceRate: 0.71 },
+  { id: schoolId++, name: 'Clarion University', division: 'D2', state: 'PA', setting: 'Rural', coa: 18000, gpaTarget: 2.7, avgAthleticScholarshipPct: 38, acceptanceRate: 0.90 },
+  { id: schoolId++, name: 'California University of PA', division: 'D2', state: 'PA', setting: 'Rural', coa: 19000, gpaTarget: 2.8, avgAthleticScholarshipPct: 40, acceptanceRate: 0.88 },
+  { id: schoolId++, name: 'Shippensburg University', division: 'D2', state: 'PA', setting: 'Rural', coa: 18000, gpaTarget: 2.9, avgAthleticScholarshipPct: 39, acceptanceRate: 0.87 },
+  { id: schoolId++, name: 'West Chester University', division: 'D2', state: 'PA', setting: 'Suburban', coa: 21000, gpaTarget: 3.0, avgAthleticScholarshipPct: 42, acceptanceRate: 0.84 },
+  { id: schoolId++, name: 'Bloomsburg University', division: 'D2', state: 'PA', setting: 'Rural', coa: 17000, gpaTarget: 2.8, avgAthleticScholarshipPct: 38, acceptanceRate: 0.92 },
+  { id: schoolId++, name: 'University of South Dakota', division: 'D2', state: 'SD', setting: 'Urban', coa: 19000, gpaTarget: 2.9, avgAthleticScholarshipPct: 45, acceptanceRate: 0.86 },
+  { id: schoolId++, name: 'South Dakota State University', division: 'D2', state: 'SD', setting: 'Rural', coa: 18000, gpaTarget: 2.8, avgAthleticScholarshipPct: 42, acceptanceRate: 0.89 },
+  { id: schoolId++, name: 'University of Winona State', division: 'D2', state: 'MN', setting: 'Rural', coa: 20000, gpaTarget: 2.9, avgAthleticScholarshipPct: 40, acceptanceRate: 0.87 },
+  { id: schoolId++, name: 'Minnesota State University', division: 'D2', state: 'MN', setting: 'Rural', coa: 19000, gpaTarget: 2.8, avgAthleticScholarshipPct: 38, acceptanceRate: 0.88 },
+  { id: schoolId++, name: 'Northern Michigan University', division: 'D2', state: 'MI', setting: 'Rural', coa: 17000, gpaTarget: 2.7, avgAthleticScholarshipPct: 40, acceptanceRate: 0.90 },
+  // Additional D3 schools (NESCAC and regional)
+  { id: schoolId++, name: 'Bates College', division: 'D3', state: 'ME', setting: 'Rural', coa: 62000, gpaTarget: 3.8, avgAthleticScholarshipPct: 0, acceptanceRate: 0.25 },
+  { id: schoolId++, name: 'Colby College', division: 'D3', state: 'ME', setting: 'Rural', coa: 64000, gpaTarget: 3.83, avgAthleticScholarshipPct: 0, acceptanceRate: 0.14 },
+  { id: schoolId++, name: 'Skidmore College', division: 'D3', state: 'NY', setting: 'Suburban', coa: 60000, gpaTarget: 3.6, avgAthleticScholarshipPct: 0, acceptanceRate: 0.30 },
+  { id: schoolId++, name: 'Union College', division: 'D3', state: 'NY', setting: 'Suburban', coa: 59000, gpaTarget: 3.7, avgAthleticScholarshipPct: 0, acceptanceRate: 0.32 },
+  { id: schoolId++, name: 'Rensselaer Polytechnic Institute', division: 'D3', state: 'NY', setting: 'Suburban', coa: 65000, gpaTarget: 3.85, avgAthleticScholarshipPct: 0, acceptanceRate: 0.26 },
+  { id: schoolId++, name: 'Quinnipiac University', division: 'D3', state: 'CT', setting: 'Suburban', coa: 53000, gpaTarget: 3.4, avgAthleticScholarshipPct: 0, acceptanceRate: 0.68 },
+  { id: schoolId++, name: 'Trinity College', division: 'D3', state: 'CT', setting: 'Urban', coa: 61000, gpaTarget: 3.8, avgAthleticScholarshipPct: 0, acceptanceRate: 0.28 },
+  { id: schoolId++, name: 'Connecticut College', division: 'D3', state: 'CT', setting: 'Suburban', coa: 58000, gpaTarget: 3.7, avgAthleticScholarshipPct: 0, acceptanceRate: 0.35 },
+  { id: schoolId++, name: 'Tufts University', division: 'D3', state: 'MA', setting: 'Suburban', coa: 69000, gpaTarget: 3.89, avgAthleticScholarshipPct: 0, acceptanceRate: 0.08 },
+  { id: schoolId++, name: 'Brandeis University', division: 'D3', state: 'MA', setting: 'Suburban', coa: 62000, gpaTarget: 3.8, avgAthleticScholarshipPct: 0, acceptanceRate: 0.23 },
+  { id: schoolId++, name: 'Babson College', division: 'D3', state: 'MA', setting: 'Suburban', coa: 64000, gpaTarget: 3.75, avgAthleticScholarshipPct: 0, acceptanceRate: 0.33 },
+  { id: schoolId++, name: 'Bard College', division: 'D3', state: 'NY', setting: 'Rural', coa: 59000, gpaTarget: 3.5, avgAthleticScholarshipPct: 0, acceptanceRate: 0.42 },
+  { id: schoolId++, name: 'Centre College', division: 'D3', state: 'KY', setting: 'Rural', coa: 54000, gpaTarget: 3.6, avgAthleticScholarshipPct: 0, acceptanceRate: 0.48 },
+  { id: schoolId++, name: 'Denison University', division: 'D3', state: 'OH', setting: 'Rural', coa: 60000, gpaTarget: 3.7, avgAthleticScholarshipPct: 0, acceptanceRate: 0.38 },
+  { id: schoolId++, name: 'DePauw University', division: 'D3', state: 'IN', setting: 'Rural', coa: 57000, gpaTarget: 3.65, avgAthleticScholarshipPct: 0, acceptanceRate: 0.44 },
+  { id: schoolId++, name: 'University of Rochester', division: 'D3', state: 'NY', setting: 'Urban', coa: 59000, gpaTarget: 3.78, avgAthleticScholarshipPct: 0, acceptanceRate: 0.31 },
+  // Additional D1 Power 4 options
+  { id: schoolId++, name: 'University of North Carolina', division: 'D1 Power 4', state: 'NC', setting: 'Urban', coa: 32000, gpaTarget: 3.5, avgAthleticScholarshipPct: 100, acceptanceRate: 0.17 },
+  { id: schoolId++, name: 'University of Virginia', division: 'D1 Power 4', state: 'VA', setting: 'Suburban', coa: 38000, gpaTarget: 3.7, avgAthleticScholarshipPct: 100, acceptanceRate: 0.20 },
+  { id: schoolId++, name: 'Northwestern University', division: 'D1 Power 4', state: 'IL', setting: 'Suburban', coa: 62000, gpaTarget: 3.85, avgAthleticScholarshipPct: 100, acceptanceRate: 0.07 },
+  { id: schoolId++, name: 'Washington University', division: 'D1 Power 4', state: 'MO', setting: 'Urban', coa: 64000, gpaTarget: 3.86, avgAthleticScholarshipPct: 100, acceptanceRate: 0.12 },
+  { id: schoolId++, name: 'Vanderbilt University', division: 'D1 Power 4', state: 'TN', setting: 'Urban', coa: 58000, gpaTarget: 3.8, avgAthleticScholarshipPct: 100, acceptanceRate: 0.09 },
+  // NAIA expansion
+  { id: schoolId++, name: 'Saint Leo University', division: 'NAIA', state: 'FL', setting: 'Suburban', coa: 40000, gpaTarget: 2.9, avgAthleticScholarshipPct: 55, acceptanceRate: 0.80 },
+  { id: schoolId++, name: 'Incarnate Word University', division: 'NAIA', state: 'TX', setting: 'Urban', coa: 38000, gpaTarget: 2.8, avgAthleticScholarshipPct: 52, acceptanceRate: 0.85 },
+  { id: schoolId++, name: 'Southern Nazarene University', division: 'NAIA', state: 'OK', setting: 'Urban', coa: 32000, gpaTarget: 2.7, avgAthleticScholarshipPct: 50, acceptanceRate: 0.87 },
+  { id: schoolId++, name: 'University of Pikeville', division: 'NAIA', state: 'KY', setting: 'Rural', coa: 28000, gpaTarget: 2.6, avgAthleticScholarshipPct: 48, acceptanceRate: 0.92 },
+  { id: schoolId++, name: 'Georgetown College', division: 'NAIA', state: 'KY', setting: 'Rural', coa: 35000, gpaTarget: 3.0, avgAthleticScholarshipPct: 52, acceptanceRate: 0.83 },
+  // Additional JUCO options
+  { id: schoolId++, name: 'Moberly Area Community College', division: 'JUCO', state: 'MO', setting: 'Rural', coa: 4500, gpaTarget: 2.2, avgAthleticScholarshipPct: 50, acceptanceRate: 1.0 },
+  { id: schoolId++, name: 'Central Texas College', division: 'JUCO', state: 'TX', setting: 'Rural', coa: 5000, gpaTarget: 2.3, avgAthleticScholarshipPct: 52, acceptanceRate: 0.99 },
+  { id: schoolId++, name: 'Cisco Junior College', division: 'JUCO', state: 'TX', setting: 'Rural', coa: 4200, gpaTarget: 2.1, avgAthleticScholarshipPct: 48, acceptanceRate: 1.0 },
+  { id: schoolId++, name: 'Odessa College', division: 'JUCO', state: 'TX', setting: 'Urban', coa: 4600, gpaTarget: 2.2, avgAthleticScholarshipPct: 50, acceptanceRate: 0.99 },
+  { id: schoolId++, name: 'Clarendon College', division: 'JUCO', state: 'TX', setting: 'Rural', coa: 4500, gpaTarget: 2.2, avgAthleticScholarshipPct: 49, acceptanceRate: 1.0 },
+  // Additional D1 Mid-Major schools (expansion set)
+  { id: schoolId++, name: 'Indiana University', division: 'D1 Mid-Major', state: 'IN', setting: 'Urban', coa: 36000, gpaTarget: 3.4, avgAthleticScholarshipPct: 68, acceptanceRate: 0.78 },
+  { id: schoolId++, name: 'Purdue University', division: 'D1 Mid-Major', state: 'IN', setting: 'Urban', coa: 34000, gpaTarget: 3.6, avgAthleticScholarshipPct: 65, acceptanceRate: 0.73 },
+  { id: schoolId++, name: 'University of Illinois', division: 'D1 Mid-Major', state: 'IL', setting: 'Urban', coa: 35000, gpaTarget: 3.5, avgAthleticScholarshipPct: 62, acceptanceRate: 0.76 },
+  { id: schoolId++, name: 'Michigan State University', division: 'D1 Mid-Major', state: 'MI', setting: 'Urban', coa: 37000, gpaTarget: 3.4, avgAthleticScholarshipPct: 64, acceptanceRate: 0.74 },
+  { id: schoolId++, name: 'University of Minnesota', division: 'D1 Mid-Major', state: 'MN', setting: 'Urban', coa: 33000, gpaTarget: 3.3, avgAthleticScholarshipPct: 58, acceptanceRate: 0.80 },
+  { id: schoolId++, name: 'University of Iowa', division: 'D1 Mid-Major', state: 'IA', setting: 'Urban', coa: 32000, gpaTarget: 3.2, avgAthleticScholarshipPct: 60, acceptanceRate: 0.82 },
+  { id: schoolId++, name: 'Kansas State University', division: 'D1 Mid-Major', state: 'KS', setting: 'Rural', coa: 29000, gpaTarget: 3.1, avgAthleticScholarshipPct: 55, acceptanceRate: 0.85 },
+  { id: schoolId++, name: 'Iowa State University', division: 'D1 Mid-Major', state: 'IA', setting: 'Rural', coa: 28000, gpaTarget: 3.0, avgAthleticScholarshipPct: 52, acceptanceRate: 0.88 },
+  { id: schoolId++, name: 'University of Cincinnati', division: 'D1 Mid-Major', state: 'OH', setting: 'Urban', coa: 30000, gpaTarget: 3.2, avgAthleticScholarshipPct: 58, acceptanceRate: 0.81 },
+  { id: schoolId++, name: 'University of Houston', division: 'D1 Mid-Major', state: 'TX', setting: 'Urban', coa: 28000, gpaTarget: 3.1, avgAthleticScholarshipPct: 55, acceptanceRate: 0.83 },
+  { id: schoolId++, name: 'University of Memphis', division: 'D1 Mid-Major', state: 'TN', setting: 'Urban', coa: 26000, gpaTarget: 2.9, avgAthleticScholarshipPct: 50, acceptanceRate: 0.90 },
+  { id: schoolId++, name: 'University of Tulsa', division: 'D1 Mid-Major', state: 'OK', setting: 'Urban', coa: 42000, gpaTarget: 3.3, avgAthleticScholarshipPct: 58, acceptanceRate: 0.76 },
+  { id: schoolId++, name: 'Southern Methodist University', division: 'D1 Mid-Major', state: 'TX', setting: 'Urban', coa: 56000, gpaTarget: 3.6, avgAthleticScholarshipPct: 62, acceptanceRate: 0.63 },
+  { id: schoolId++, name: 'Texas Tech University', division: 'D1 Mid-Major', state: 'TX', setting: 'Urban', coa: 28000, gpaTarget: 3.1, avgAthleticScholarshipPct: 56, acceptanceRate: 0.84 },
+  { id: schoolId++, name: 'University of New Mexico', division: 'D1 Mid-Major', state: 'NM', setting: 'Urban', coa: 24000, gpaTarget: 2.8, avgAthleticScholarshipPct: 48, acceptanceRate: 0.93 },
+  // Additional D2 schools - state universities and regional options
+  { id: schoolId++, name: 'Wayne State University', division: 'D2', state: 'MI', setting: 'Urban', coa: 21000, gpaTarget: 2.9, avgAthleticScholarshipPct: 35, acceptanceRate: 0.86 },
+  { id: schoolId++, name: 'Oakland University', division: 'D2', state: 'MI', setting: 'Suburban', coa: 18000, gpaTarget: 2.8, avgAthleticScholarshipPct: 32, acceptanceRate: 0.89 },
+  { id: schoolId++, name: 'Central Michigan University', division: 'D2', state: 'MI', setting: 'Rural', coa: 22000, gpaTarget: 2.9, avgAthleticScholarshipPct: 38, acceptanceRate: 0.83 },
+  { id: schoolId++, name: 'Eastern Michigan University', division: 'D2', state: 'MI', setting: 'Suburban', coa: 23000, gpaTarget: 2.8, avgAthleticScholarshipPct: 36, acceptanceRate: 0.85 },
+  { id: schoolId++, name: 'Western Michigan University', division: 'D2', state: 'MI', setting: 'Urban', coa: 24000, gpaTarget: 3.0, avgAthleticScholarshipPct: 39, acceptanceRate: 0.81 },
+  { id: schoolId++, name: 'University of Wisconsin-Oshkosh', division: 'D2', state: 'WI', setting: 'Suburban', coa: 19000, gpaTarget: 2.9, avgAthleticScholarshipPct: 33, acceptanceRate: 0.87 },
+  { id: schoolId++, name: 'University of Wisconsin-Whitewater', division: 'D2', state: 'WI', setting: 'Rural', coa: 17000, gpaTarget: 2.8, avgAthleticScholarshipPct: 30, acceptanceRate: 0.91 },
+  { id: schoolId++, name: 'University of Wisconsin-Green Bay', division: 'D2', state: 'WI', setting: 'Urban', coa: 18000, gpaTarget: 2.7, avgAthleticScholarshipPct: 31, acceptanceRate: 0.88 },
+  { id: schoolId++, name: 'Illinois State University', division: 'D2', state: 'IL', setting: 'Urban', coa: 26000, gpaTarget: 3.0, avgAthleticScholarshipPct: 40, acceptanceRate: 0.82 },
+  { id: schoolId++, name: 'Northern Illinois University', division: 'D2', state: 'IL', setting: 'Suburban', coa: 24000, gpaTarget: 2.9, avgAthleticScholarshipPct: 37, acceptanceRate: 0.86 },
+  { id: schoolId++, name: 'Western Illinois University', division: 'D2', state: 'IL', setting: 'Rural', coa: 21000, gpaTarget: 2.8, avgAthleticScholarshipPct: 35, acceptanceRate: 0.88 },
+  { id: schoolId++, name: 'University of Missouri-St. Louis', division: 'D2', state: 'MO', setting: 'Urban', coa: 20000, gpaTarget: 2.9, avgAthleticScholarshipPct: 36, acceptanceRate: 0.84 },
+  { id: schoolId++, name: 'Missouri State University', division: 'D2', state: 'MO', setting: 'Urban', coa: 23000, gpaTarget: 3.0, avgAthleticScholarshipPct: 39, acceptanceRate: 0.81 },
+  { id: schoolId++, name: 'University of Arkansas at Little Rock', division: 'D2', state: 'AR', setting: 'Urban', coa: 19000, gpaTarget: 2.8, avgAthleticScholarshipPct: 34, acceptanceRate: 0.87 },
+  { id: schoolId++, name: 'University of North Florida', division: 'D2', state: 'FL', setting: 'Urban', coa: 22000, gpaTarget: 2.9, avgAthleticScholarshipPct: 38, acceptanceRate: 0.85 },
+  { id: schoolId++, name: 'Florida Atlantic University', division: 'D2', state: 'FL', setting: 'Urban', coa: 24000, gpaTarget: 3.0, avgAthleticScholarshipPct: 40, acceptanceRate: 0.80 },
+  { id: schoolId++, name: 'University of West Florida', division: 'D2', state: 'FL', setting: 'Urban', coa: 21000, gpaTarget: 2.9, avgAthleticScholarshipPct: 36, acceptanceRate: 0.86 },
+  { id: schoolId++, name: 'Stephen F. Austin State University', division: 'D2', state: 'TX', setting: 'Rural', coa: 20000, gpaTarget: 2.8, avgAthleticScholarshipPct: 35, acceptanceRate: 0.88 },
+  { id: schoolId++, name: 'Texas Southern University', division: 'D2', state: 'TX', setting: 'Urban', coa: 19000, gpaTarget: 2.7, avgAthleticScholarshipPct: 33, acceptanceRate: 0.90 },
+  { id: schoolId++, name: 'Prairie View A&M University', division: 'D2', state: 'TX', setting: 'Rural', coa: 18000, gpaTarget: 2.6, avgAthleticScholarshipPct: 32, acceptanceRate: 0.91 },
+  { id: schoolId++, name: 'Texas State University', division: 'D2', state: 'TX', setting: 'Urban', coa: 22000, gpaTarget: 2.9, avgAthleticScholarshipPct: 38, acceptanceRate: 0.84 },
+  // Additional D3 schools - NESCAC and regional
+  { id: schoolI ++, name: 'Colgate University', division: 'D3', state: 'NY', setting: 'Rural', coa: 66000, gpaTarget: 3.82, avgAthleticScholarshipPct: 0, acceptanceRate: 0.22 },
+  { id: schoolId++, name: 'Hamilton College', division: 'D3', state: 'NY', setting: 'Rural', coa: 65000, gpaTarget: 3.81, avgAthleticScholarshipPct: 0, acceptanceRate: 0.24 },
+  { id: schoolId++, name: 'Colby College', division: 'D3', state: 'ME', setting: 'Rural', coa: 64000, gpaTarget: 3.83, avgAthleticScholarshipPct: 0, acceptanceRate: 0.14 },
+  { id: schoolId++, name: 'Bates College', division: 'D3', state: 'ME', setting: 'Rural', coa: 62000, gpaTarget: 3.8, avgAthleticScholarshipPct: 0, acceptanceRate: 0.25 },
+  { id: schoolId++, name: 'Trinity College', division: 'D3', state: 'CT', setting: 'Urban', coa: 61000, gpaTarget: 3.8, avgAthleticScholarshipPct: 0, acceptanceRate: 0.28 },
+  { id: schoolId++, name: 'Connecticut College', division: 'D3', state: 'CT', setting: 'Suburban', coa: 58000, gpaTarget: 3.7, avgAthleticScholarshipPct: 0, acceptanceRate: 0.35 },
+  { id: schoolId++, name: 'Wheaton College', division: 'D3', state: 'MA', setting: 'Suburban', coa: 57000, gpaTarget: 3.6, avgAthleticScholarshipPct: 0, acceptanceRate: 0.42 },
+  { id: schoolId++, name: 'Endicott College', division: 'D3', state: 'MA', setting: 'Suburban', coa: 52000, gpaTarget: 3.4, avgAthleticScholarshipPct: 0, acceptanceRate: 0.65 },
+  { id: schoolId++, name: 'Clark University', division: 'D3', state: 'MA', setting: 'Urban', coa: 54000, gpaTarget: 3.5, avgAthleticScholarshipPct: 0, acceptanceRate: 0.58 },
+  { id: schoolId++, name: 'Kenyon College', division: 'D3', state: 'OH', setting: 'Rural', coa: 61000, gpaTarget: 3.75, avgAthleticScholarshipPct: 0, acceptanceRate: 0.33 },
+  { id: schoolId++, name: 'Oberlin College', division: 'D3', state: 'OH', setting: 'Rural', coa: 59000, gpaTarget: 3.7, avgAthleticScholarshipPct: 0, acceptanceRate: 0.37 },
+  { id: schoolId++, name: 'Wittenberg University', division: 'D3', state: 'OH', setting: 'Suburban', coa: 48000, gpaTarget: 3.2, avgAthleticScholarshipPct: 0, acceptanceRate: 0.72 },
+  { id: schoolId++, name: 'Ohio Wesleyan University', division: 'D3', state: 'OH', setting: 'Rural', coa: 50000, gpaTarget: 3.3, avgAthleticScholarshipPct: 0, acceptanceRate: 0.68 },
+  { id: schoolId++, name: 'Hiram College', division: 'D3', state: 'OH', setting: 'Rural', coa: 42000, gpaTarget: 3.0, avgAthleticScholarshipPct: 0, acceptanceRate: 0.80 },
+  { id: schoolId++, name: 'Albion College', division: 'D3', state: 'MI', setting: 'Rural', coa: 48000, gpaTarget: 3.2, avgAthleticScholarshipPct: 0, acceptanceRate: 0.75 },
+  { id: schoolId++, name: 'Hope College', division: 'D3', state: 'MI', setting: 'Suburban', coa: 50000, gpaTarget: 3.4, avgAthleticScholarshipPct: 0, acceptanceRate: 0.70 },
+  { id: schoolId++, name: 'Kalamazoo College', division: 'D3', state: 'MI', setting: 'Urban', coa: 52000, gpaTarget: 3.5, avgAthleticScholarshipPct: 0, acceptanceRate: 0.67 },
+  { id: schoolId++, name: 'Lawrence University', division: 'D3', state: 'WI', setting: 'Urban', coa: 54000, gpaTarget: 3.6, avgAthleticScholarshipPct: 0, acceptanceRate: 0.61 },
+  { id: schoolId++, name: 'Grinnell College', division: 'D3', state: 'IA', setting: 'Rural', coa: 57000, gpaTarget: 3.7, avgAthleticScholarshipPct: 0, acceptanceRate: 0.40 },
+  { id: schoolId++, name: 'Carleton College', division: 'D3', state: 'MN', setting: 'Rural', coa: 58000, gpaTarget: 3.75, avgAthleticScholarshipPct: 0, acceptanceRate: 0.36 },
+  // Additional NAIA schools
+  { id: schoolId++, name: 'Cornerstone University', division: 'NAIA', state: 'MI', setting: 'Urban', coa: 34000, gpaTarget: 2.8, avgAthleticScholarshipPct: 50, acceptanceRate: 0.88 },
+  { id: schoolId++, name: 'Spring Arbor University', division: 'NAIA', state: 'MI', setting: 'Suburban', coa: 36000, gpaTarget: 2.9, avgAthleticScholarshipPct: 51, acceptanceRate: 0.86 },
+  { id: schoolId++, name: 'Aquinas College', division: 'NAIA', state: 'MI', setting: 'Suburban', coa: 38000, gpaTarget: 3.0, avgAthleticScholarshipPct: 52, acceptanceRate: 0.84 },
+  { id: schoolId++, name: 'Olivet Nazarene University', division: 'NAIA', state: 'IL', setting: 'Suburban', coa: 39000, gpaTarget: 3.0, avgAthleticScholarshipPct: 53, acceptanceRate: 0.83 },
+  { id: schoolId++, name: 'Bethel College Indiana', division: 'NAIA', state: 'IN', setting: 'Rural', coa: 35000, gpaTarget: 2.9, avgAthleticScholarshipPct: 51, acceptanceRate: 0.85 },
+  { id: schoolId++, name: 'Manchester University', division: 'NAIA', state: 'IN', setting: 'Suburban', coa: 37000, gpaTarget: 2.9, avgAthleticScholarshipPct: 50, acceptanceRate: 0.86 },
+  { id: schoolId++, name: 'Taylor University', division: 'NAIA', state: 'IN', setting: 'Rural', coa: 40000, gpaTarget: 3.1, avgAthleticScholarshipPct: 54, acceptanceRate: 0.80 },
+  { id: schoolId++, name: 'Huntington University', division: 'NAIA', state: 'IN', setting: 'Rural', coa: 36000, gpaTarget: 2.9, avgAthleticScholarshipPct: 50, acceptanceRate: 0.87 },
+  { id: schoolId++, name: 'Indiana Wesleyan University', division: 'NAIA', state: 'IN', setting: 'Suburban', coa: 38000, gpaTarget: 3.0, avgAthleticScholarshipPct: 52, acceptanceRate: 0.84 },
+  { id: schoolId++, name: 'Asbury University', division: 'NAIA', state: 'KY', setting: 'Suburban', coa: 36000, gpaTarget: 3.0, avgAthleticScholarshipPct: 51, acceptanceRate: 0.85 },
+  { id: schoolId++, name: 'Bryan University', division: 'NAIA', state: 'TN', setting: 'Suburban', coa: 30000, gpaTarget: 2.7, avgAthleticScholarshipPct: 48, acceptanceRate: 0.90 },
+  { id: schoolId++, name: 'University of Mobile', division: 'NAIA', state: 'AL', setting: 'Urban', coa: 28000, gpaTarget: 2.6, avgAthleticScholarshipPct: 46, acceptanceRate: 0.92 },
+  { id: schoolId++, name: 'Savannah College of Art and Design', division: 'NAIA', state: 'GA', setting: 'Urban', coa: 44000, gpaTarget: 3.2, avgAthleticScholarshipPct: 54, acceptanceRate: 0.79 },
+  // Additional JUCO schools
+  { id: schoolId++, name: 'Blinn College', division: 'JUCO', state: 'TX', setting: 'Rural', coa: 5200, gpaTarget: 2.3, avgAthleticScholarshipPct: 53, acceptanceRate: 0.99 },
+  { id: schoolId++, name: 'San Jacinto College', division: 'JUCO', state: 'TX', setting: 'Urban', coa: 5500, gpaTarget: 2.4, avgAthleticScholarshipPct: 55, acceptanceRate: 0.98 },
+  { id: schoolId++, name: 'Tyler Junior College', division: 'JUCO', state: 'TX', setting: 'Urban', coa: 4800, gpaTarget: 2.2, avgAthleticScholarshipPct: 51, acceptanceRate: 0.99 },
+  { id: schoolId++, name: 'Tarleton State University', division: 'JUCO', state: 'TX', setting: 'Rural', coa: 6000, gpaTarget: 2.5, avgAthleticScholarshipPct: 57, acceptanceRate: 0.97 },
+  { id: schoolId++, name: 'Navarro College', division: 'JUCO', state: 'TX', setting: 'Rural', coa: 5000, gpaTarget: 2.3, avgAthleticScholarshipPct: 52, acceptanceRate: 0.99 },
+  { id: schoolId++, name: 'McLennan Community College', division: 'JUCO', state: 'TX', setting: 'Urban', coa: 5300, gpaTarget: 2.4, avgAthleticScholarshipPct: 54, acceptanceRate: 0.98 },
+  { id: schoolId++, name: 'Temple College', division: 'JUCO', state: 'TX', setting: 'Urban', coa: 4900, gpaTarget: 2.2, avgAthleticScholarshipPct: 50, acceptanceRate: 1.0 },
+  { id: schoolId++, name: 'Hill College', division: 'JUCO', state: 'TX', setting: 'Rural', coa: 4700, gpaTarget: 2.2, avgAthleticScholarshipPct: 49, acceptanceRate: 1.0 },
+  { id: schoolId++, name: 'Allen Community College', division: 'JUCO', state: 'KS', setting: 'Rural', coa: 5000, gpaTarget: 2.3, avgAthleticScholarshipPct: 52, acceptanceRate: 0.99 },
+  { id: schoolId++, name: 'Butler Community College', division: 'JUCO', state: 'KS', setting: 'Rural', coa: 5100, gpaTarget: 2.4, avgAthleticScholarshipPct: 53, acceptanceRate: 0.99 },
 ];
+
 
 app.get('/api/schools/matches', (req: any, res) => {
   const userId = req.userId;
@@ -884,12 +1456,21 @@ app.get('/api/schools/watchlist', (req: any, res) => {
 
 // Mock milestones database
 const mockMilestones: any[] = [
+  // Football milestones
   { id: 1, title: 'Identify 20+ target schools', sport: 'Football', category: 'Research', priority: 'high', gradYearOffsetMonths: 18 },
   { id: 2, title: 'Create highlight film', sport: 'Football', category: 'Film', priority: 'high', gradYearOffsetMonths: 15 },
   { id: 3, title: 'Attend 3 summer camps', sport: 'Football', category: 'Camps', priority: 'medium', gradYearOffsetMonths: 12 },
   { id: 4, title: 'Send first recruiting email', sport: 'Football', category: 'Outreach', priority: 'high', gradYearOffsetMonths: 12 },
   { id: 5, title: 'Attend 5 official visits', sport: 'Football', category: 'Visits', priority: 'high', gradYearOffsetMonths: 6 },
   { id: 6, title: 'Complete standardized testing', sport: 'Football', category: 'Testing', priority: 'medium', gradYearOffsetMonths: 12 },
+  // Soccer milestones
+  { id: 7, title: 'Create highlight reel (90 sec)', sport: 'Soccer', category: 'Film', priority: 'high', gradYearOffsetMonths: 16 },
+  { id: 8, title: 'Identify 25+ target schools', sport: 'Soccer', category: 'Research', priority: 'high', gradYearOffsetMonths: 18 },
+  { id: 9, title: 'Attend 3-4 showcases/camps', sport: 'Soccer', category: 'Camps', priority: 'high', gradYearOffsetMonths: 14 },
+  { id: 10, title: 'Initial contact with 20+ coaches', sport: 'Soccer', category: 'Outreach', priority: 'high', gradYearOffsetMonths: 12 },
+  { id: 11, title: 'Attend 2-3 official visits', sport: 'Soccer', category: 'Visits', priority: 'high', gradYearOffsetMonths: 8 },
+  { id: 12, title: 'Finalize test scores (SAT/ACT)', sport: 'Soccer', category: 'Testing', priority: 'high', gradYearOffsetMonths: 12 },
+  { id: 13, title: 'Commit to a school', sport: 'Soccer', category: 'Decision', priority: 'high', gradYearOffsetMonths: 4 },
 ];
 
 app.get('/api/milestones', (req: any, res) => {

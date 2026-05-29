@@ -36,6 +36,7 @@ interface ProfileContextType {
   createProfile: (profile: CreateProfileInput) => Promise<AthleteProfile>;
   updateProfile: (updates: Partial<CreateProfileInput>) => Promise<AthleteProfile>;
   clearProfile: () => Promise<void>;
+  reloadProfile: () => Promise<void>;
   isLoading: boolean;
   error: string | null;
 }
@@ -108,6 +109,25 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return Promise.resolve();
   };
 
+  const reloadProfile = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const profile = await api.profile.get();
+      setCurrentProfile(profile);
+    } catch (err) {
+      // 404 is expected when user hasn't created a profile yet
+      const errorMsg = (err as Error).message;
+      if (!errorMsg.includes('404') && !errorMsg.includes('not found')) {
+        console.error('Failed to reload profile:', err);
+        setError(errorMsg);
+      }
+      setCurrentProfile(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <ProfileContext.Provider
       value={{
@@ -115,6 +135,7 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
         createProfile,
         updateProfile,
         clearProfile,
+        reloadProfile,
         isLoading,
         error,
       }}
